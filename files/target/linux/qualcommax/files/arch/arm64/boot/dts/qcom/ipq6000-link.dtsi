@@ -1,0 +1,132 @@
+// SPDX-License-Identifier: GPL-2.0-or-later OR MIT
+//
+// Link NN6000 v1/v2 shared DTS.
+// Ported from OpenWrt master commit 0c068c6c ("qualcommax: ipq60xx: add Link
+// NN6000v1/v2 support"), which predates the PPE/DSA conversion and thus uses
+// the same QSDK NSS dataplane bindings (dpN + switch_*_bmp) as the 6.12
+// kernel in iStoreOS 25.12.
+
+#include "ipq6018-512m.dtsi"
+#include "ipq6018-ess.dtsi"
+
+#include <dt-bindings/gpio/gpio.h>
+#include <dt-bindings/input/input.h>
+#include <dt-bindings/leds/common.h>
+
+/ {
+	aliases {
+		serial0 = &blsp1_uart3;
+		led-boot = &led_status_red;
+		led-failsafe = &led_status_red;
+		led-running = &led_status_green;
+		led-upgrade = &led_status_red;
+	};
+
+	chosen {
+		/* QSDK 6.12 UART is ttyMSM0; identical to the proven ipq6000
+		 * eMMC bootargs on the same kernel (jdcloud,re-ss-01). */
+		bootargs = "console=ttyMSM0,115200,n8";
+		bootargs-append = " rootfstype=squashfs,ext4 swiotlb=1 coherent_pool=2M swiotlb=1";
+	};
+
+	keys {
+		compatible = "gpio-keys";
+
+		wps {
+			label = "wps";
+			linux,code = <KEY_WPS_BUTTON>;
+			gpios = <&tlmm 42 GPIO_ACTIVE_LOW>;
+		};
+
+		reset {
+			label = "reset";
+			linux,code = <KEY_RESTART>;
+			gpios = <&tlmm 9 GPIO_ACTIVE_LOW>;
+		};
+	};
+
+	leds {
+		/* Single RGB led controlled via GPIO.
+		To mimic the OEM default behaviour red are switched on from boot */
+		compatible = "gpio-leds";
+
+		led_status_red: status-red {
+			gpios = <&tlmm 50 GPIO_ACTIVE_HIGH>;
+			color = <LED_COLOR_ID_RED>;
+			function = LED_FUNCTION_STATUS;
+			default-state = "on";
+		};
+
+		led_status_green: status-green {
+			gpios = <&tlmm 70 GPIO_ACTIVE_HIGH>;
+			color = <LED_COLOR_ID_GREEN>;
+			function = LED_FUNCTION_STATUS;
+		};
+
+		led_status_blue: status-blue {
+			gpios = <&tlmm 69 GPIO_ACTIVE_HIGH>;
+			color = <LED_COLOR_ID_BLUE>;
+			function = LED_FUNCTION_STATUS;
+		};
+	};
+};
+
+&tlmm {
+	gpio-reserved-ranges = <20 1>;
+
+	mdio_pins: mdio-pins {
+		mdc {
+			pins = "gpio64";
+			function = "mdc";
+			drive-strength = <8>;
+			bias-pull-up;
+		};
+
+		mdio {
+			pins = "gpio65";
+			function = "mdio";
+			drive-strength = <8>;
+			bias-pull-up;
+		};
+	};
+};
+
+&blsp1_uart3 {
+	status = "okay";
+	pinctrl-0 = <&serial_3_pins>;
+	pinctrl-names = "default";
+};
+
+&qusb_phy_0 {
+	status = "okay";
+};
+
+&ssphy_0 {
+	status = "okay";
+};
+
+&usb3 {
+	status = "okay";
+};
+
+&rpm {
+	status = "disabled";
+};
+
+&sdhc {
+	bus-width = <8>;
+	mmc-ddr-1_8v;
+	mmc-hs200-1_8v;
+	non-removable;
+	status = "okay";
+};
+
+&wifi {
+	status = "okay";
+	qcom,ath11k-fw-memory-mode = <1>;
+	qcom,ath11k-calibration-variant = "Link-NN6000";
+};
+
+&edma {
+	status = "okay";
+};

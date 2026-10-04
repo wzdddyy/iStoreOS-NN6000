@@ -1,0 +1,115 @@
+# Link NN6000 v2 - iStoreOS 25.12 build seed
+# Apply with:  cat config/nn6000.seed > .config && make defconfig
+
+# --- Target / devices -------------------------------------------------------
+CONFIG_TARGET_qualcommax=y
+CONFIG_TARGET_qualcommax_ipq60xx=y
+CONFIG_TARGET_qualcommax_ipq60xx_DEVICE_link_nn6000-v2=y
+CONFIG_TARGET_PER_DEVICE_ROOTFS=y
+CONFIG_TARGET_ROOTFS_SQUASHFS=y
+CONFIG_TARGET_ROOTFS_INITRAMFS=y
+CONFIG_KERNEL_BUILD_USER="istoreos"
+CONFIG_KERNEL_BUILD_DOMAIN="istoreos"
+
+# --- iStoreOS home page / quickstart stack ---------------------------------
+CONFIG_PACKAGE_luci-app-store=y
+CONFIG_PACKAGE_quickstart=y
+CONFIG_PACKAGE_luci-app-quickstart=y
+CONFIG_PACKAGE_luci-i18n-quickstart-zh-cn=y
+CONFIG_PACKAGE_taskd=y
+CONFIG_PACKAGE_luci-lib-taskd=y
+CONFIG_PACKAGE_luci-lib-xterm=y
+CONFIG_PACKAGE_shadow-utils=y
+CONFIG_PACKAGE_shadow-useradd=y
+CONFIG_PACKAGE_mount-utils=y
+CONFIG_PACKAGE_block-mount=y
+CONFIG_PACKAGE_lsblk=y
+CONFIG_PACKAGE_e2fsprogs=y
+CONFIG_PACKAGE_parted=y
+CONFIG_PACKAGE_smartmontools=y
+CONFIG_PACKAGE_smartd=y
+CONFIG_PACKAGE_smartmontools-drivedb=y
+CONFIG_PACKAGE_mdadm=y
+CONFIG_PACKAGE_ip-full=y
+CONFIG_PACKAGE_bash=y
+
+# --- luci-app-store hard requirement: disable optional tar compression -----
+# CONFIG_PACKAGE_TAR_BZIP2 is not set
+# CONFIG_PACKAGE_TAR_XZ is not set
+# CONFIG_PACKAGE_TAR_ZSTD is not set
+
+# --- Theme ------------------------------------------------------------------
+CONFIG_PACKAGE_luci-theme-argon=y
+CONFIG_PACKAGE_luci-app-argon-config=y
+
+# --- Core LuCI --------------------------------------------------------------
+CONFIG_PACKAGE_luci=y
+CONFIG_PACKAGE_luci-app-firewall=y
+CONFIG_PACKAGE_luci-app-package-manager=y
+CONFIG_PACKAGE_luci-compat=y
+
+# --- Terminal / disk / filesystems ------------------------------------------
+CONFIG_PACKAGE_ttyd=y
+CONFIG_PACKAGE_luci-app-ttyd=y
+CONFIG_PACKAGE_blkid=y
+CONFIG_PACKAGE_kmod-usb-storage=y
+CONFIG_PACKAGE_kmod-usb-storage-uas=y
+CONFIG_PACKAGE_usb-storage-utils=y
+CONFIG_PACKAGE_kmod-fs-vfat=y
+CONFIG_PACKAGE_kmod-fs-exfat=y
+CONFIG_PACKAGE_kmod-fs-f2fs=y
+CONFIG_PACKAGE_kmod-fs-ext4=y
+CONFIG_PACKAGE_kmod-fs-ntfs3=y
+CONFIG_PACKAGE_mkf2fs=y
+CONFIG_PACKAGE_f2fsck=y
+CONFIG_PACKAGE_ntfs3-mount=y
+CONFIG_PACKAGE_luci-app-hd-idle=y
+
+# --- NAS sharing ------------------------------------------------------------
+CONFIG_PACKAGE_luci-app-samba4=y
+CONFIG_PACKAGE_samba4-server=y
+CONFIG_PACKAGE_samba4-libs=y
+CONFIG_PACKAGE_luci-app-ksmbd=y
+CONFIG_PACKAGE_ksmbd-server=y
+CONFIG_PACKAGE_webdavfs=y
+CONFIG_PACKAGE_luci-app-nfs=y
+CONFIG_PACKAGE_luci-app-cifs-mount=y
+CONFIG_PACKAGE_luci-app-minidlna=y
+CONFIG_PACKAGE_minidlna=y
+
+# --- Common services --------------------------------------------------------
+CONFIG_PACKAGE_luci-app-wol=y
+CONFIG_PACKAGE_luci-app-upnp=y
+CONFIG_PACKAGE_luci-app-ddns=y
+CONFIG_PACKAGE_luci-app-dockerman=y
+CONFIG_PACKAGE_docker=y
+CONFIG_PACKAGE_dockerd=y
+CONFIG_PACKAGE_luci-app-filetransfer=y
+CONFIG_PACKAGE_luci-lib-fs=y
+CONFIG_PACKAGE_luci-app-tn-netports=y
+
+# --- Base CLI utilities -----------------------------------------------------
+CONFIG_PACKAGE_curl=y
+CONFIG_PACKAGE_tar=y
+CONFIG_PACKAGE_gzip=y
+CONFIG_PACKAGE_xz-utils=y
+CONFIG_PACKAGE_unzip=y
+CONFIG_PACKAGE_ca-bundle=y
+
+# --- Chinese localization ---------------------------------------------------
+CONFIG_LUCI_LANG_zh_Hans=y
+CONFIG_PACKAGE_luci-i18n-base-zh-cn=y
+CONFIG_PACKAGE_luci-i18n-firewall-zh-cn=y
+CONFIG_PACKAGE_luci-i18n-ttyd-zh-cn=y
+CONFIG_PACKAGE_luci-i18n-samba4-zh-cn=y
+CONFIG_PACKAGE_luci-i18n-ksmbd-zh-cn=y
+CONFIG_PACKAGE_luci-i18n-dockerman-zh-cn=y
+CONFIG_PACKAGE_luci-i18n-ddns-zh-cn=y
+CONFIG_PACKAGE_luci-i18n-wol-zh-cn=y
+CONFIG_PACKAGE_luci-i18n-upnp-zh-cn=y
+CONFIG_PACKAGE_luci-i18n-minidlna-zh-cn=y
+CONFIG_PACKAGE_luci-i18n-argon-config-zh-cn=y
+CONFIG_PACKAGE_zoneinfo-asia=y
+
+# --- TUN for proxy clients (Tailscale / sing-box tun / OpenClash) ----------
+CONFIG_PACKAGE_kmod-tun=y

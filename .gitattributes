@@ -1,2 +1,30 @@
-# Auto detect text files and perform LF normalization
-* text=auto
+# Force LF for all executable/script content; CRLF breaks shebang parsing,
+# DTS compilation, shell fragment insertion and init scripts on the device.
+*.sh    text eol=lf
+*.py    text eol=lf
+*.yml   text eol=lf
+*.yaml  text eol=lf
+*.dts   text eol=lf
+*.dtsi  text eol=lf
+*.block text eol=lf
+*.seed  text eol=lf
+*.mk    text eol=lf
+Makefile* text eol=lf
+.gitattributes text eol=lf
+
+# Vendored OpenWrt package payloads (init scripts, LuCI lua/js/htm, po, ...).
+# Everything under files/ is text; any CRLF here either breaks boot or
+# changes static asset bytes for no benefit.
+files/** text eol=lf
+*.init   text eol=lf
+*.hotplug text eol=lf
+*.config text eol=lf
+*.uci-default text eol=lf
+*.lua    text eol=lf
+*.htm    text eol=lf
+*.js     text eol=lf
+*.json   text eol=lf
+*.css    text eol=lf
+*.po     text eol=lf
+*.pot    text eol=lf
+*.md     text eol=lf
