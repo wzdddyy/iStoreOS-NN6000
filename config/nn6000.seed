@@ -1,6 +1,10 @@
 # Link NN6000 v2 - iStoreOS 25.12 build seed
 # Apply with:  cat config/nn6000.seed > .config && make defconfig
 
+# --- Build acceleration -----------------------------------------------------
+CONFIG_DEVEL=y
+CONFIG_CCACHE=y
+
 # --- Target / devices -------------------------------------------------------
 CONFIG_TARGET_qualcommax=y
 CONFIG_TARGET_qualcommax_ipq60xx=y

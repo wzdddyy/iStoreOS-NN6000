@@ -23,7 +23,7 @@ jobs:
     timeout-minutes: 720
     env:
       ISTOREOS_BRANCH: ${{ github.event.inputs.istoreos_ref }}
-      CCACHE_DIR: ${{ github.workspace }}/.ccache
+      CCACHE_DIR: ${{ github.workspace }}/istoreos/.ccache
       CCACHE_MAXSIZE: 1G
 
     steps:
@@ -60,7 +60,7 @@ jobs:
       - name: Restore ccache
         uses: actions/cache@v4
         with:
-          path: ${{ github.workspace }}/.ccache
+          path: istoreos/.ccache
           key: ccache-${{ runner.os }}-${{ steps.info.outputs.commit_hash }}-${{ hashFiles('config/nn6000.seed') }}
           restore-keys: |
             ccache-${{ runner.os }}-${{ steps.info.outputs.commit_hash }}-
@@ -102,11 +102,11 @@ jobs:
           set -o pipefail
           cat "$GITHUB_WORKSPACE/config/nn6000.seed" > .config
           make defconfig
-          # Enable ccache for incremental build speedup
-          ./scripts/config --enable CCACHE
-          make defconfig
           echo "::group::Selected device symbols"
           grep -E '^CONFIG_TARGET_(BOARD|SUBTARGET|PROFILE)|DEVICE_link_nn6000' .config || true
+          echo "::endgroup::"
+          echo "::group::ccache config"
+          grep -E '^CONFIG_(DEVEL|CCACHE)' .config || true
           echo "::endgroup::"
 
       - name: Verify target device is selected
