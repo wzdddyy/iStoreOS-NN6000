@@ -1,14 +1,4 @@
 #!/bin/sh
-# SPDX-License-Identifier: GPL-2.0-or-later
-#
-# Port Link NN6000 v1/v2 support into an iStoreOS 25.12 source tree.
-# POSIX sh only; the patch engine needs just awk/cat/mktemp from the system.
-#
-# Usage:
-#   scripts/apply-nn6000.sh /path/to/istoreos
-#
-# The script is idempotent: it can be executed repeatedly against the same
-# tree without duplicating insertions.
 
 set -eu
 
@@ -36,8 +26,6 @@ fi
 
 echo "==> [1/3] Copying overlay files (DTS + vendored packages)"
 cp -a "$REPO_DIR/files/." "$TREE/"
-# Windows / zip checkouts lose the executable bit; OpenWrt packages files
-# under root/ with their stored mode, so restore it explicitly.
 chmod 0755 "$TREE/package/quickstart/files/"*.init \
            "$TREE/package/quickstart/files/"*.hotplug \
            "$TREE/package/quickstart/files/"*.uci-default \
@@ -72,7 +60,7 @@ check "ipq-wifi board registered"    grep -q 'ipq-wifi-package,link_nn6000' "$TR
 check "uboot-envtools mmc entry"     grep -q 'ubootenv_add_mmc "0:APPSBLENV"' "$TREE/package/boot/uboot-tools/uboot-envtools/files/qualcommax_ipq60xx"
 check "vendored quickstart package"  test -f "$TREE/package/quickstart/Makefile"
 check "vendored luci-app-quickstart" test -f "$TREE/package/luci-app-quickstart/Makefile"
-# CRLF in any shipped shell/init script breaks the device boot ("bad interpreter")
+check "loop overlay boot script"    grep -q '_get_overlay_partition_loop' "$TREE/package/base-files/files/lib/functions/istoreos-boot.sh"
 CR=$(printf '\r')
 if grep -rIl "$CR" "$TREE/package/quickstart" "$TREE/package/luci-app-quickstart" >/dev/null 2>&1; then
 	echo "  FAIL  vendored packages contain CRLF line endings" >&2

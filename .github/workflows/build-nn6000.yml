@@ -1,6 +1,5 @@
 name: istoreos-nn6000 build
 
-# Manual trigger only. Push to the repository does NOT start a build.
 on:
   workflow_dispatch:
     inputs:
@@ -24,6 +23,8 @@ jobs:
     timeout-minutes: 720
     env:
       ISTOREOS_BRANCH: ${{ github.event.inputs.istoreos_ref }}
+      CCACHE_DIR: ${{ github.workspace }}/.ccache
+      CCACHE_MAXSIZE: 1G
 
     steps:
       - name: Checkout port repository
@@ -52,8 +53,36 @@ jobs:
             build-essential clang flex bison g++ gawk \
             gcc-multilib g++-multilib gettext git \
             libncurses-dev libssl-dev python3-setuptools \
-            rsync unzip zlib1g-dev file wget swig
+            rsync unzip zlib1g-dev file wget swig \
+            ccache
           sudo apt-get clean
+
+      - name: Restore ccache
+        uses: actions/cache@v4
+        with:
+          path: ${{ github.workspace }}/.ccache
+          key: ccache-${{ runner.os }}-${{ steps.info.outputs.commit_hash }}-${{ hashFiles('config/nn6000.seed') }}
+          restore-keys: |
+            ccache-${{ runner.os }}-${{ steps.info.outputs.commit_hash }}-
+            ccache-${{ runner.os }}-
+
+      - name: Restore downloaded sources (dl/)
+        uses: actions/cache@v4
+        with:
+          path: istoreos/dl
+          key: dl-${{ runner.os }}-${{ steps.info.outputs.commit_hash }}
+          restore-keys: |
+            dl-${{ runner.os }}-
+
+      - name: Restore toolchain (cross-compiler)
+        uses: actions/cache@v4
+        with:
+          path: |
+            istoreos/staging_dir/toolchain-*
+            istoreos/build_dir/toolchain-*
+          key: toolchain-${{ runner.os }}-${{ steps.info.outputs.commit_hash }}
+          restore-keys: |
+            toolchain-${{ runner.os }}-
 
       - name: Apply NN6000 port
         run: |
@@ -72,6 +101,9 @@ jobs:
         run: |
           set -o pipefail
           cat "$GITHUB_WORKSPACE/config/nn6000.seed" > .config
+          make defconfig
+          # Enable ccache for incremental build speedup
+          ./scripts/config --enable CCACHE
           make defconfig
           echo "::group::Selected device symbols"
           grep -E '^CONFIG_TARGET_(BOARD|SUBTARGET|PROFILE)|DEVICE_link_nn6000' .config || true
@@ -151,6 +183,9 @@ jobs:
             echo "::warning::Parallel build failed, retrying single-threaded with V=s"
             make -j1 V=s 2>&1 | tee -a build.log
           fi
+          echo "::group::ccache stats"
+          ccache -s || true
+          echo "::endgroup::"
 
       - name: Verify artifacts
         working-directory: ${{ github.workspace }}/istoreos
@@ -200,6 +235,21 @@ jobs:
         run: |
           echo "tag=rel-nn6000-$(TZ=Asia/Shanghai date +%Y%m%d-%H%M)" >> "$GITHUB_OUTPUT"
           echo "human=$(TZ=Asia/Shanghai date '+%Y-%m-%d %H:%M')" >> "$GITHUB_OUTPUT"
+          echo "date=$(TZ=Asia/Shanghai date +%Y%m%d)" >> "$GITHUB_OUTPUT"
+
+      - name: Stage release artifacts with date prefix
+        if: success() && inputs.publish_release
+        run: |
+          set -o pipefail
+          SRC="istoreos/bin/targets/qualcommax/ipq60xx"
+          DST="release-artifacts"
+          DATE="${{ steps.ts.outputs.date }}"
+          mkdir -p "$DST"
+          for f in "$SRC"/*link_nn6000-v2*.bin "$SRC"/*link_nn6000-v2*.itb "$SRC"/*link_nn6000-v2*.manifest; do
+            [ -e "$f" ] || continue
+            cp "$f" "$DST/${DATE}-$(basename "$f")"
+          done
+          ls -lh "$DST"
 
       - name: Publish release
         if: success() && inputs.publish_release
@@ -209,13 +259,11 @@ jobs:
           target_commitish: ${{ github.sha }}
           name: iStoreOS Link NN6000 v2 固件 ${{ steps.ts.outputs.human }}
           files: |
-            istoreos/bin/targets/qualcommax/ipq60xx/*link_nn6000-v2*.bin
-            istoreos/bin/targets/qualcommax/ipq60xx/*link_nn6000-v2*.itb
-            istoreos/bin/targets/qualcommax/ipq60xx/*link_nn6000-v2*.manifest
+            release-artifacts/*
           body: |
             ## iStoreOS Link NN6000 v2 固件
 
-            - **目标设备**: Link NN6000 v2（4 个 LAN 口 + 1 个 WAN 口）
+            - **目标设备**: Link NN6000 v2
             - **平台**: qualcommax/ipq60xx (ipq6000)
             - **iStoreOS 分支**: ${{ env.ISTOREOS_BRANCH }}
             - **iStoreOS 提交**: ${{ steps.info.outputs.commit_hash }} (${{ steps.info.outputs.commit_date }})

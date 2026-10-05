@@ -1,21 +1,4 @@
 #!/bin/sh
-# SPDX-License-Identifier: GPL-2.0-or-later
-#
-# Idempotently insert the Link NN6000 port fragments into an iStoreOS 25.12
-# source tree. Pure POSIX sh + awk: no bash, no python required.
-#
-# Normal insertions are wrapped in marker lines:
-#   # >>> NN6000 <tag> >>>
-#   ... block ...
-#   # <<< NN6000 <tag> <<<
-# Re-running first removes the old marked block, then inserts the current one.
-#
-# "inline" insertions add bare lines into a line-continuation sequence
-# (a Makefile variable continued with trailing backslashes), where a comment
-# line would terminate the variable. Idempotency there works by removing
-# pre-existing identical lines before inserting.
-#
-# Usage: patch_tree.sh <istoreos-tree-root> <blocks-dir>
 
 set -eu
 
@@ -35,7 +18,6 @@ fi
 TMP=$(mktemp -d 2>/dev/null || mktemp -d -t nn6000)
 trap 'rm -rf "$TMP"' EXIT INT TERM
 
-# --- awk program (shared by every insertion task) ---------------------------
 cat > "$TMP/prog.awk" <<'AWKEOF'
 BEGIN {
 	bmark = sprintf("# >>> NN6000 %s >>>", TAG)
@@ -126,7 +108,6 @@ END {
 }
 AWKEOF
 
-# --- anchor files (literal tabs are significant; keep quoted heredocs) ------
 cat > "$TMP/a_iface" <<'EOF'
 	8devices,mango-dvk|\
 	glinet,gl-axt1800)
@@ -155,7 +136,6 @@ cat > "$TMP/a_ubootenv" <<'EOF'
 	;;
 EOF
 
-# P <rel-path> <tag> <mode> <anchor-file|-> <block-file> <inline 0|1>
 P() {
 	_rel=$1; _tag=$2; _mode=$3; _anch=$4; _blk=$5; _inline=$6
 	_path="$ROOT/$_rel"
@@ -190,7 +170,6 @@ P "target/linux/qualcommax/ipq60xx/base-files/etc/hotplug.d/firmware/11-ath11k-c
 P "target/linux/qualcommax/ipq60xx/base-files/lib/upgrade/platform.sh" \
   "emmc-upgrade" "before" "a_default" "platform.block" 0
 
-# ALLWIFIBOARDS is one backslash-continued variable: bare line, no marker.
 P "package/firmware/ipq-wifi/Makefile" \
   "wifi-board-list" "after" "a_iodata_list" "ipqwifi-boards.block" 1
 
