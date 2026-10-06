@@ -28,7 +28,7 @@ jobs:
 
     steps:
       - name: Checkout port repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6.0.2
 
       - name: Fetch iStoreOS source
         run: |
@@ -58,7 +58,7 @@ jobs:
           sudo apt-get clean
 
       - name: Restore ccache
-        uses: actions/cache@v4
+        uses: actions/cache@v6.1.0
         with:
           path: istoreos/.ccache
           key: ccache-${{ runner.os }}-${{ steps.info.outputs.commit_hash }}-${{ hashFiles('config/nn6000.seed') }}
@@ -67,7 +67,7 @@ jobs:
             ccache-${{ runner.os }}-
 
       - name: Restore downloaded sources (dl/)
-        uses: actions/cache@v4
+        uses: actions/cache@v6.1.0
         with:
           path: istoreos/dl
           key: dl-${{ runner.os }}-${{ steps.info.outputs.commit_hash }}
@@ -75,7 +75,7 @@ jobs:
             dl-${{ runner.os }}-
 
       - name: Restore toolchain (cross-compiler)
-        uses: actions/cache@v4
+        uses: actions/cache@v6.1.0
         with:
           path: |
             istoreos/staging_dir/toolchain-*
@@ -160,6 +160,13 @@ jobs:
           ttyd
           luci-app-ttyd
           kmod-tun
+          kmod-qca-nss-drv
+          kmod-qca-nss-ecm
+          kmod-qca-nss-crypto
+          kmod-pppoe
+          kmod-macvlan
+          nss-firmware-ipq60xx
+          nss-eip-firmware
           "
           MISSING=""
           for p in $HARD; do
@@ -218,7 +225,7 @@ jobs:
           M=$(ls "$OUT"/*link_nn6000-v2*.manifest 2>/dev/null | head -1)
           [ -n "$M" ] || { echo "::error::no manifest for link_nn6000-v2"; exit 1; }
           echo "::group::Manifest check: link_nn6000-v2"
-          for pkg in ipq-wifi-link_nn6000 quickstart luci-app-quickstart dockerd f2fs-tools kmod-fs-f2fs kmod-ath11k-ahb; do
+          for pkg in ipq-wifi-link_nn6000 quickstart luci-app-quickstart dockerd f2fs-tools kmod-fs-f2fs kmod-ath11k-ahb kmod-qca-nss-drv kmod-qca-nss-ecm kmod-qca-nss-crypto kmod-pppoe kmod-macvlan nss-firmware-ipq60xx nss-eip-firmware; do
             if grep -q "^${pkg} " "$M"; then
               echo "  ok      $pkg"
             else
