@@ -1,0 +1,3 @@
+# QCA NSS stack kernel options (same as immortalwrt qualcommax 6.12)
+CONFIG_SKB_RECYCLER=y
+CONFIG_SKB_RECYCLER_MULTI_CPU=y

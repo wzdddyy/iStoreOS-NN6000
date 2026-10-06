@@ -179,4 +179,7 @@ P "package/firmware/ipq-wifi/Makefile" \
 P "package/boot/uboot-tools/uboot-envtools/files/qualcommax_ipq60xx" \
   "ubootenv" "after" "a_ubootenv" "ubootenv.block" 0
 
+P "target/linux/qualcommax/config-6.12" \
+  "nss-kconfig" "append" "-" "kconfig.block" 0
+
 echo "All NN6000 fragments applied."

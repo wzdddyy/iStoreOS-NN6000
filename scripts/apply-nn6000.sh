@@ -80,8 +80,21 @@ check "overview cpuinfo script"     test -f "$TREE/files/usr/bin/cpuinfo"
 check "overview tempinfo script"    test -f "$TREE/files/usr/bin/tempinfo"
 check "overview cpuusage script"    test -f "$TREE/files/usr/bin/cpuusage"
 check "overview 10_system.js"       grep -q 'getCPUUsage' "$TREE/files/www/luci-static/resources/view/status/include/10_system.js"
+check "vendored qca-nss-drv"         test -f "$TREE/package/qca-nss-drv/Makefile"
+check "vendored qca-nss-ecm"         test -f "$TREE/package/qca-nss-ecm/Makefile"
+check "vendored qca-nss-crypto"      test -f "$TREE/package/qca-nss-crypto/Makefile"
+check "vendored nss-firmware"        test -f "$TREE/package/nss-firmware/Makefile"
+check "vendored nss-eip-firmware"    test -f "$TREE/package/nss-eip-firmware/Makefile"
+check "NSS kernel patches copied"    test -f "$TREE/target/linux/qualcommax/patches-6.12/0600-1-qca-nss-ecm-support-CORE.patch" \
+                              -a -f "$TREE/target/linux/qualcommax/patches-6.12/0602-1-qca-nss-drv-add-qdisc-support.patch" \
+                              -a -f "$TREE/target/linux/qualcommax/patches-6.12/0606-1-qca-nss-ecm-bridge-Fixes-for-Bridge-VLAN-Filtering.patch" \
+                              -a -f "$TREE/target/linux/qualcommax/patches-6.12/0981-1-qca-skb_recycler-support.patch"
+check "NSS kernel config fragment"   grep -q 'NN6000 nss-kconfig' "$TREE/target/linux/qualcommax/config-6.12"
 CR=$(printf '\r')
-if grep -rIl "$CR" "$TREE/package/quickstart" "$TREE/package/luci-app-quickstart" >/dev/null 2>&1; then
+if grep -rIl "$CR" "$TREE/package/quickstart" "$TREE/package/luci-app-quickstart" \
+              "$TREE/package/qca-nss-drv" "$TREE/package/qca-nss-ecm" \
+              "$TREE/package/qca-nss-crypto" "$TREE/package/nss-firmware" \
+              "$TREE/package/nss-eip-firmware" >/dev/null 2>&1; then
 	echo "  FAIL  vendored packages contain CRLF line endings" >&2
 	exit 1
 else
