@@ -1,0 +1,27 @@
+#!/bin/sh
+# NN6000 port: CPU architecture / core count / current frequency for the
+# LuCI overview "Architecture" row (ImmortalWrt autocore-style output).
+CPUINFO_PATH="/proc/cpuinfo"
+CPUFREQ_PATH="/sys/devices/system/cpu/cpufreq"
+
+cpu_arch="$(awk -F ': ' '/model name/ {print $2; exit}' "$CPUINFO_PATH")"
+[ -n "$cpu_arch" ] || cpu_arch="$(uname -m)"
+cpu_cores="$(grep -c processor "$CPUINFO_PATH")"
+
+cpu_freq=""
+for policy in "$CPUFREQ_PATH"/policy*; do
+	if [ -r "$policy/cpuinfo_cur_freq" ]; then
+		cpu_freq="$(awk '{printf("%dMHz", $0 / 1000)}' "$policy/cpuinfo_cur_freq")"
+		break
+	fi
+	if [ -r "$policy/scaling_cur_freq" ]; then
+		cpu_freq="$(awk '{printf("%dMHz", $0 / 1000)}' "$policy/scaling_cur_freq")"
+		break
+	fi
+done
+
+if [ -n "$cpu_freq" ]; then
+	printf '%s x %s (%s)' "$cpu_arch" "$cpu_cores" "$cpu_freq"
+else
+	printf '%s x %s' "$cpu_arch" "$cpu_cores"
+fi

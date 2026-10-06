@@ -1,0 +1,28 @@
+#!/bin/sh
+# NN6000 port: CPU + WiFi temperatures for the LuCI overview.
+# CPU comes from the first thermal zone (hwmon device with fallback to the
+# raw zone temp), WiFi temps from every ath11k phy hwmon device.
+cpu_temp=""
+for f in /sys/class/thermal/thermal_zone0/hwmon*/temp1_input \
+         /sys/class/thermal/thermal_zone0/temp; do
+	if [ -r "$f" ]; then
+		cpu_temp="$(awk '{printf("%.1f°C", $0 / 1000)}' "$f")"
+		break
+	fi
+done
+
+output=""
+[ -n "$cpu_temp" ] && output="CPU: $cpu_temp"
+
+for f in /sys/class/ieee80211/phy*/hwmon*/temp1_input; do
+	[ -r "$f" ] || continue
+	phy="$(basename "$(dirname "$(dirname "$f")")")"
+	wifi_temp="$(awk '{printf("%.1f°C", $0 / 1000)}' "$f")"
+	output="$output $phy: $wifi_temp"
+done
+
+if [ -z "$output" ]; then
+	printf 'No temperature info'
+else
+	printf '%s' "$output"
+fi
