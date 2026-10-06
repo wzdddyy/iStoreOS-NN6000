@@ -94,6 +94,10 @@ jobs:
         run: |
           set -o pipefail
           ./scripts/feeds update -a
+          # Use lisaac's original luci-app-dockerman (top-level menu) from the
+          # custom "dockerman" feed; drop the luci feed copy to avoid a
+          # duplicate package definition.
+          rm -rf feeds/luci/applications/luci-app-dockerman
           ./scripts/feeds install -a
 
       - name: Configure (.config seed + defconfig)

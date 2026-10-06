@@ -24,7 +24,7 @@ if ! grep -q '^KERNEL_PATCHVER:=6\.12$' "$TREE/target/linux/qualcommax/Makefile"
 	exit 1
 fi
 
-echo "==> [1/3] Copying overlay files (DTS + vendored packages)"
+echo "==> [1/4] Copying overlay files (DTS + vendored packages)"
 cp -a "$REPO_DIR/files/." "$TREE/"
 chmod 0755 "$TREE/package/quickstart/files/"*.init \
            "$TREE/package/quickstart/files/"*.hotplug \
@@ -33,10 +33,23 @@ chmod 0755 "$TREE/package/quickstart/files/"*.init \
            "$TREE/package/luci-app-quickstart/root/etc/uci-defaults/50_luci-quickstart" \
            "$TREE/package/luci-app-quickstart/root/usr/libexec/quickstart/auto_setup.sh" 2>/dev/null || true
 
-echo "==> [2/3] Patching existing tree files"
+echo "==> [2/4] Appending dockerman feeds (lisaac originals)"
+# lisaac's luci-app-dockerman registers a top-level "Docker" menu (admin/docker),
+# unlike the luci-feed version which nests under admin/services. The luci feed
+# copy is removed by CI before `feeds install` to avoid a duplicate definition.
+FEEDS_FILE="$TREE/feeds.conf.default"
+if ! grep -q 'lisaac/luci-app-dockerman' "$FEEDS_FILE"; then
+	cat >> "$FEEDS_FILE" <<'EOF'
+# NN6000 port: lisaac original dockerman (top-level menu) + luci-lib-docker
+src-git dockerman https://github.com/lisaac/luci-app-dockerman.git;6fd9937954e0b080bf07967182d714ea21fe7eb1
+src-git lucidocker https://github.com/lisaac/luci-lib-docker.git;98a663449208b65e68702ad0f3ad61c536bfa40c
+EOF
+fi
+
+echo "==> [3/4] Patching existing tree files"
 sh "$SCRIPT_DIR/patch_tree.sh" "$TREE" "$REPO_DIR/blocks"
 
-echo "==> [3/3] Verifying"
+echo "==> [4/4] Verifying"
 check() {
 	desc="$1"; shift
 	if "$@" >/dev/null 2>&1; then
@@ -61,6 +74,8 @@ check "uboot-envtools mmc entry"     grep -q 'ubootenv_add_mmc "0:APPSBLENV"' "$
 check "vendored quickstart package"  test -f "$TREE/package/quickstart/Makefile"
 check "vendored luci-app-quickstart" test -f "$TREE/package/luci-app-quickstart/Makefile"
 check "loop overlay boot script"    grep -q '_get_overlay_partition_loop' "$TREE/package/base-files/files/lib/functions/istoreos-boot.sh"
+check "dockerman feed pinned"       grep -q 'lisaac/luci-app-dockerman' "$TREE/feeds.conf.default"
+check "luci-lib-docker feed pinned" grep -q 'lisaac/luci-lib-docker' "$TREE/feeds.conf.default"
 CR=$(printf '\r')
 if grep -rIl "$CR" "$TREE/package/quickstart" "$TREE/package/luci-app-quickstart" >/dev/null 2>&1; then
 	echo "  FAIL  vendored packages contain CRLF line endings" >&2
