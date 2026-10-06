@@ -37,12 +37,13 @@ echo "==> [2/4] Appending dockerman feeds (lisaac originals)"
 # lisaac's luci-app-dockerman registers a top-level "Docker" menu (admin/docker),
 # unlike the luci-feed version which nests under admin/services. The luci feed
 # copy is removed by CI before `feeds install` to avoid a duplicate definition.
+# Feeds follow the upstream master branch; every build pulls the latest code.
 FEEDS_FILE="$TREE/feeds.conf.default"
 if ! grep -q 'lisaac/luci-app-dockerman' "$FEEDS_FILE"; then
 	cat >> "$FEEDS_FILE" <<'EOF'
 # NN6000 port: lisaac original dockerman (top-level menu) + luci-lib-docker
-src-git dockerman https://github.com/lisaac/luci-app-dockerman.git;6fd9937954e0b080bf07967182d714ea21fe7eb1
-src-git lucidocker https://github.com/lisaac/luci-lib-docker.git;98a663449208b65e68702ad0f3ad61c536bfa40c
+src-git dockerman https://github.com/lisaac/luci-app-dockerman.git;master
+src-git lucidocker https://github.com/lisaac/luci-lib-docker.git;master
 EOF
 fi
 
