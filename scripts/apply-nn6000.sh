@@ -24,7 +24,7 @@ if ! grep -q '^KERNEL_PATCHVER:=6\.12$' "$TREE/target/linux/qualcommax/Makefile"
 	exit 1
 fi
 
-echo "==> [1/4] Copying overlay files (DTS + vendored packages)"
+echo "==> [1/3] Copying overlay files (DTS + vendored packages)"
 mkdir -p "$TREE/files"
 for entry in "$REPO_DIR/files"/*; do
 	case "$(basename "$entry")" in
@@ -43,19 +43,10 @@ chmod 0755 "$TREE/files/usr/bin/cpuinfo" \
            "$TREE/files/usr/bin/tempinfo" \
            "$TREE/files/usr/bin/cpuusage" 2>/dev/null || true
 
-echo "==> [2/4] Appending dockerman feeds (lisaac originals)"
-FEEDS_FILE="$TREE/feeds.conf.default"
-if ! grep -q 'lisaac/luci-app-dockerman' "$FEEDS_FILE"; then
-	cat >> "$FEEDS_FILE" <<'EOF'
-src-git dockerman https://github.com/lisaac/luci-app-dockerman.git;master
-src-git lucidocker https://github.com/lisaac/luci-lib-docker.git;master
-EOF
-fi
-
-echo "==> [3/4] Patching existing tree files"
+echo "==> [2/3] Patching existing tree files"
 sh "$SCRIPT_DIR/patch_tree.sh" "$TREE" "$REPO_DIR/blocks"
 
-echo "==> [4/4] Verifying"
+echo "==> [3/3] Verifying"
 check() {
 	desc="$1"; shift
 	if "$@" >/dev/null 2>&1; then
@@ -80,8 +71,8 @@ check "uboot-envtools mmc entry"     grep -q 'ubootenv_add_mmc "0:APPSBLENV"' "$
 check "vendored quickstart package"  test -f "$TREE/package/quickstart/Makefile"
 check "vendored luci-app-quickstart" test -f "$TREE/package/luci-app-quickstart/Makefile"
 check "loop overlay boot script"    grep -q '_get_overlay_partition_loop' "$TREE/package/base-files/files/lib/functions/istoreos-boot.sh"
-check "dockerman feed pinned"       grep -q 'lisaac/luci-app-dockerman' "$TREE/feeds.conf.default"
-check "luci-lib-docker feed pinned" grep -q 'lisaac/luci-lib-docker' "$TREE/feeds.conf.default"
+check "vendored luci-app-dockerman"  test -f "$TREE/package/luci-app-dockerman/Makefile"
+check "vendored luci-lib-docker"     test -f "$TREE/package/luci-lib-docker/Makefile"
 check "overview cpuinfo script"     test -f "$TREE/files/usr/bin/cpuinfo"
 check "overview tempinfo script"    test -f "$TREE/files/usr/bin/tempinfo"
 check "overview cpuusage script"    test -f "$TREE/files/usr/bin/cpuusage"
@@ -100,7 +91,8 @@ CR=$(printf '\r')
 if grep -rIl "$CR" "$TREE/package/quickstart" "$TREE/package/luci-app-quickstart" \
               "$TREE/package/qca-nss-drv" "$TREE/package/qca-nss-ecm" \
               "$TREE/package/qca-nss-crypto" "$TREE/package/nss-firmware" \
-              "$TREE/package/nss-eip-firmware" >/dev/null 2>&1; then
+              "$TREE/package/nss-eip-firmware" \
+              "$TREE/package/luci-app-dockerman" "$TREE/package/luci-lib-docker" >/dev/null 2>&1; then
 	echo "  FAIL  vendored packages contain CRLF line endings" >&2
 	exit 1
 else
