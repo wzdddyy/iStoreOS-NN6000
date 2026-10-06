@@ -25,7 +25,13 @@ if ! grep -q '^KERNEL_PATCHVER:=6\.12$' "$TREE/target/linux/qualcommax/Makefile"
 fi
 
 echo "==> [1/4] Copying overlay files (DTS + vendored packages)"
-cp -a "$REPO_DIR/files/." "$TREE/"
+mkdir -p "$TREE/files"
+for entry in "$REPO_DIR/files"/*; do
+	case "$(basename "$entry")" in
+		usr|www) cp -a "$entry" "$TREE/files/" ;;
+		*)       cp -a "$entry" "$TREE/" ;;
+	esac
+done
 chmod 0755 "$TREE/package/quickstart/files/"*.init \
            "$TREE/package/quickstart/files/"*.hotplug \
            "$TREE/package/quickstart/files/"*.uci-default \
