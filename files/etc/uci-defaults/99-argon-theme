@@ -1,0 +1,10 @@
+#!/bin/sh
+if [ ! -f /etc/config/argon ]; then
+    touch /etc/config/argon
+    uci add argon global
+fi
+
+uci set argon.@global[0].primary='#28a745'
+uci set argon.@global[0].dark_primary='#4A6B5D'
+uci set argon.@global[0].transparency='0.3'
+uci commit argon
