@@ -1,6 +1,7 @@
-## iStoreOS for Link NN6000 v1/v2
+## iStoreOS for Link NN6000 v2
 
 基于 [iStoreOS](https://github.com/istoreos) `25.12` 分支，适配 **Link NN6000 系列（IPQ6000，eMMC）** 
+带满血NSS驱动。
 
 ## 推荐分区
 
@@ -44,8 +45,8 @@ istoreos-nn6000/
 
 ## 免责声明
 
-刷机有风险，请自行评估；本仓库仅用于学习交流。
+刷机有风险，自行承担后果；本仓库仅用于学习交流。
 
 ## 感谢
 
-iStoreOS：[仓库链接](https://github.com/istoreos/)
+iStoreOS源码：[仓库链接](https://github.com/istoreos/)
