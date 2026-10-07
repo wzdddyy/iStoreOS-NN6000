@@ -1,0 +1,4 @@
+#!/bin/sh
+# Remove the OpenWrt official kmods feed from apk repositories.
+DISTS=/etc/apk/repositories.d/distfeeds.list
+[ -f "$DISTS" ] && sed -i '/\/kmods\//d' "$DISTS"
