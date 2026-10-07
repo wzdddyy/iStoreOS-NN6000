@@ -86,6 +86,11 @@ CONFIG_PACKAGE_luci-app-filetransfer=y
 CONFIG_PACKAGE_luci-lib-fs=y
 CONFIG_PACKAGE_luci-app-tn-netports=y
 
+# --- DNS / DHCP -------------------------------------------------------------
+CONFIG_PACKAGE_dnsmasq=n
+CONFIG_PACKAGE_dnsmasq-full=y
+CONFIG_PACKAGE_dnsmasq_full_conntrack=y
+
 # --- Base CLI utilities -----------------------------------------------------
 CONFIG_PACKAGE_curl=y
 CONFIG_PACKAGE_tar=y
