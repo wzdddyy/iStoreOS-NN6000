@@ -87,12 +87,16 @@ check "NSS kernel patches copied"    test -f "$TREE/target/linux/qualcommax/patc
                               -a -f "$TREE/target/linux/qualcommax/patches-6.12/0606-1-qca-nss-ecm-bridge-Fixes-for-Bridge-VLAN-Filtering.patch" \
                               -a -f "$TREE/target/linux/qualcommax/patches-6.12/0981-1-qca-skb_recycler-support.patch"
 check "NSS kernel config fragment"   grep -q 'NN6000 nss-kconfig' "$TREE/target/linux/qualcommax/config-6.12"
+check "skb recycler header"          test -f "$TREE/target/linux/qualcommax/files/net/core/skbuff_recycle.h"
+check "skb recycler source"          test -f "$TREE/target/linux/qualcommax/files/net/core/skbuff_recycle.c"
+check "skb debug header"             test -f "$TREE/target/linux/qualcommax/files/net/core/skbuff_debug.h"
 CR=$(printf '\r')
 if grep -rIl "$CR" "$TREE/package/quickstart" "$TREE/package/luci-app-quickstart" \
               "$TREE/package/qca-nss-drv" "$TREE/package/qca-nss-ecm" \
               "$TREE/package/qca-nss-crypto" "$TREE/package/nss-firmware" \
               "$TREE/package/nss-eip-firmware" \
-              "$TREE/package/luci-app-dockerman" "$TREE/package/luci-lib-docker" >/dev/null 2>&1; then
+              "$TREE/package/luci-app-dockerman" "$TREE/package/luci-lib-docker" \
+              "$TREE/target/linux/qualcommax/files/net/core" >/dev/null 2>&1; then
 	echo "  FAIL  vendored packages contain CRLF line endings" >&2
 	exit 1
 else
