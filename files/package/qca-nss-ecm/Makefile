@@ -38,8 +38,8 @@ define KernelPackage/qca-nss-ecm
 		   +PACKAGE_kmod-nat46:kmod-nat46 \
 		   +PACKAGE_kmod-ppp:kmod-ppp \
 		   +PACKAGE_kmod-pppoe:kmod-pppoe \
-		   +PACKAGE_kmod-pppoe:kmod-pptp \
-		   +PACKAGE_kmod-pppoe:kmod-pppol2tp
+		   +PACKAGE_kmod-pptp:kmod-pptp \
+		   +PACKAGE_kmod-pppol2tp:kmod-pppol2tp
   TITLE:=QCA NSS Enhanced Connection Manager (ECM)
   FILES:=$(PKG_BUILD_DIR)/ecm.ko
   KCONFIG:=CONFIG_NF_CONNTRACK_DSCPREMARK_EXT=y
@@ -129,12 +129,16 @@ endif
 
 ifneq ($(CONFIG_PACKAGE_kmod-pppoe),)
 ECM_MAKE_OPTS+=ECM_INTERFACE_PPPOE_ENABLE=y \
-			   ECM_INTERFACE_PPTP_ENABLE=y \
 			   ECM_INTERFACE_PPP_ENABLE=y
 else
 ECM_MAKE_OPTS+=ECM_INTERFACE_PPPOE_ENABLE=n \
-			   ECM_INTERFACE_PPTP_ENABLE=n \
 			   ECM_INTERFACE_PPP_ENABLE=n
+endif
+
+ifneq ($(CONFIG_PACKAGE_kmod-pptp),)
+ECM_MAKE_OPTS+=ECM_INTERFACE_PPTP_ENABLE=y
+else
+ECM_MAKE_OPTS+=ECM_INTERFACE_PPTP_ENABLE=n
 endif
 
 ifneq ($(CONFIG_PACKAGE_kmod-pppol2tp),)
