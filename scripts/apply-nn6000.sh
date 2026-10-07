@@ -90,13 +90,17 @@ check "NSS kernel config fragment"   grep -q 'NN6000 nss-kconfig' "$TREE/target/
 check "skb recycler header"          test -f "$TREE/target/linux/qualcommax/files/net/core/skbuff_recycle.h"
 check "skb recycler source"          test -f "$TREE/target/linux/qualcommax/files/net/core/skbuff_recycle.c"
 check "skb debug header"             test -f "$TREE/target/linux/qualcommax/files/net/core/skbuff_debug.h"
+check "nf_conntrack_dscpremark_ext header" test -f "$TREE/target/linux/qualcommax/files/include/net/netfilter/nf_conntrack_dscpremark_ext.h"
+check "nf_conntrack_dscpremark_ext source" test -f "$TREE/target/linux/qualcommax/files/net/netfilter/nf_conntrack_dscpremark_ext.c"
 CR=$(printf '\r')
 if grep -rIl "$CR" "$TREE/package/quickstart" "$TREE/package/luci-app-quickstart" \
               "$TREE/package/qca-nss-drv" "$TREE/package/qca-nss-ecm" \
               "$TREE/package/qca-nss-crypto" "$TREE/package/nss-firmware" \
               "$TREE/package/nss-eip-firmware" \
               "$TREE/package/luci-app-dockerman" "$TREE/package/luci-lib-docker" \
-              "$TREE/target/linux/qualcommax/files/net/core" >/dev/null 2>&1; then
+              "$TREE/target/linux/qualcommax/files/net/core" \
+              "$TREE/target/linux/qualcommax/files/net/netfilter" \
+              "$TREE/target/linux/qualcommax/files/include/net/netfilter" >/dev/null 2>&1; then
 	echo "  FAIL  vendored packages contain CRLF line endings" >&2
 	exit 1
 else
