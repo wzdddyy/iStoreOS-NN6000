@@ -48,9 +48,6 @@ ifeq ($(ARCH),mipsel)
   endif
 endif
 
-PKG_SOURCE:=lucky_$(PKG_VERSION)_Linux_$(LUCKY_ARCH).tar.gz
-PKG_SOURCE_URL:=https://github.com/gdy666/lucky/releases/download/v$(PKG_VERSION)
-PKG_HASH:=skip
 PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)-$(PKG_VERSION)
 
 include $(INCLUDE_DIR)/package.mk
@@ -72,13 +69,14 @@ define Package/lucky/conffiles
 /etc/config/lucky
 endef
 
+# Wanji (万吉) build ships as a prebuilt tarball inside the package dir.
+# Extract it straight from $(CURDIR) instead of going through DL_DIR /
+# PKG_SOURCE_URL, so the build never depends on a GitHub release download
+# succeeding (that previously made `make` fail in ~1s on flaky networks).
 define Build/Prepare
 	mkdir -p $(PKG_BUILD_DIR)
-	if [ -f "$(CURDIR)/lucky_$(PKG_VERSION)_Linux_$(LUCKY_ARCH)_wanji.tar.gz" ]; then \
-		cp "$(CURDIR)/lucky_$(PKG_VERSION)_Linux_$(LUCKY_ARCH)_wanji.tar.gz" "$(DL_DIR)/$(PKG_SOURCE)"; \
-	fi
-	gzip -dc $(DL_DIR)/$(PKG_SOURCE) | $(HOST_TAR) -C $(PKG_BUILD_DIR) -xf -
-	$(Build/Patch)
+	gzip -dc $(CURDIR)/lucky_$(PKG_VERSION)_Linux_$(LUCKY_ARCH)_wanji.tar.gz \
+		| $(HOST_TAR) -C $(PKG_BUILD_DIR) -xf -
 endef
 
 define Build/Compile
