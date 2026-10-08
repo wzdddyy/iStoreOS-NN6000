@@ -50,3 +50,10 @@ istoreos-nn6000/
 ## 感谢
 
 iStoreOS源码：[仓库链接](https://github.com/istoreos/)
+
+NSS 驱动源码取自以下项目：
+
+* **qca-nss-drv**：<https://git.codelinaro.org/clo/qsdk/oss/lklm/nss-drv.git>
+* **qca-nss-ecm**：<https://git.codelinaro.org/clo/qsdk/oss/lklm/qca-nss-ecm.git>
+* **qca-nss-crypto**：<https://git.codelinaro.org/clo/qsdk/oss/lklm/nss-crypto.git>
+* **nss-firmware**：<https://github.com/qosmio/qca-sdk-nss-fw>
