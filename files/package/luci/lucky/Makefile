@@ -73,7 +73,10 @@ define Package/lucky/conffiles
 endef
 
 define Build/Prepare
-	[ -f $(CURDIR)/lucky_$(PKG_VERSION)_Linux_$(LUCKY_ARCH)_wanji.tar.gz ] && install -Dm644 $(CURDIR)/lucky_$(PKG_VERSION)_Linux_$(LUCKY_ARCH)_wanji.tar.gz $(DL_DIR)/$(PKG_SOURCE)
+	mkdir -p $(PKG_BUILD_DIR)
+	if [ -f "$(CURDIR)/lucky_$(PKG_VERSION)_Linux_$(LUCKY_ARCH)_wanji.tar.gz" ]; then \
+		cp "$(CURDIR)/lucky_$(PKG_VERSION)_Linux_$(LUCKY_ARCH)_wanji.tar.gz" "$(DL_DIR)/$(PKG_SOURCE)"; \
+	fi
 	gzip -dc $(DL_DIR)/$(PKG_SOURCE) | $(HOST_TAR) -C $(PKG_BUILD_DIR) -xf -
 	$(Build/Patch)
 endef
