@@ -102,17 +102,15 @@ jobs:
           ./scripts/feeds update -i
           ./scripts/feeds install -a
 
-      - name: Patch luci rpcd for CPU info & temperature
-        run: |
-          set -o pipefail
-          sh scripts/patch_luci.sh "$GITHUB_WORKSPACE/istoreos"
-
-      - name: Configure (.config seed + defconfig)
+      - name: Patch luci rpcd, configure (.config) and verify
         working-directory: ${{ github.workspace }}/istoreos
         run: |
           set -o pipefail
+          sh "$GITHUB_WORKSPACE/scripts/patch_luci.sh" "$GITHUB_WORKSPACE/istoreos"
+
           cat "$GITHUB_WORKSPACE/config/nn6000.seed" > .config
           make defconfig
+
           echo "::group::Selected device symbols"
           grep -E '^CONFIG_TARGET_(BOARD|SUBTARGET|PROFILE)|DEVICE_link_nn6000' .config || true
           echo "::endgroup::"
@@ -120,11 +118,9 @@ jobs:
           grep -E '^CONFIG_(DEVEL|CCACHE)' .config || true
           echo "::endgroup::"
 
-      - name: Verify target device is selected
-        working-directory: ${{ github.workspace }}/istoreos
-        run: |
-          set -o pipefail
           FAIL=0
+
+          # --- Verify target device is selected ---
           if grep -q '^CONFIG_TARGET_qualcommax_ipq60xx_DEVICE_link_nn6000-v2=y' .config; then
             echo "::notice::device selected: link_nn6000-v2"
           else
@@ -134,11 +130,8 @@ jobs:
           fi
           grep -q '^CONFIG_TARGET_ROOTFS_INITRAMFS=y' .config \
             || { echo "::error::initramfs image is disabled; TFTP first-install image will be missing"; FAIL=1; }
-          exit $FAIL
 
-      - name: Verify UI stack survived defconfig
-        working-directory: ${{ github.workspace }}/istoreos
-        run: |
+          # --- Verify required packages survived defconfig ---
           # defconfig silently drops packages with unsatisfied dependencies.
           # Fail fast here instead of building firmware with no web UI.
           HARD="
@@ -182,8 +175,10 @@ jobs:
           done
           if [ -n "$MISSING" ]; then
             echo "::error::Required packages were dropped by defconfig:$MISSING"
-            exit 1
+            FAIL=1
           fi
+
+          exit $FAIL
 
       - name: Pre-download sources
         working-directory: ${{ github.workspace }}/istoreos
@@ -239,30 +234,18 @@ jobs:
           echo "::endgroup::"
           exit $FAIL
 
-      - name: Upload build log
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: build-log
-          path: istoreos/build.log
-          if-no-files-found: warn
-          retention-days: 7
-
-      - name: Generate release timestamp
-        id: ts
-        if: success()
-        run: |
-          echo "tag=rel-nn6000-$(TZ=Asia/Shanghai date +%Y%m%d-%H%M)" >> "$GITHUB_OUTPUT"
-          echo "human=$(TZ=Asia/Shanghai date '+%Y-%m-%d %H:%M')" >> "$GITHUB_OUTPUT"
-          echo "date=$(TZ=Asia/Shanghai date +%Y%m%d)" >> "$GITHUB_OUTPUT"
-
       - name: Stage release artifacts with date prefix
+        id: ts
         if: success() && inputs.publish_release
         run: |
           set -o pipefail
+          echo "tag=rel-nn6000-$(TZ=Asia/Shanghai date +%Y%m%d-%H%M)" >> "$GITHUB_OUTPUT"
+          echo "human=$(TZ=Asia/Shanghai date '+%Y-%m-%d %H:%M')" >> "$GITHUB_OUTPUT"
+          DATE="$(TZ=Asia/Shanghai date +%Y%m%d)"
+          echo "date=$DATE" >> "$GITHUB_OUTPUT"
+
           SRC="istoreos/bin/targets/qualcommax/ipq60xx"
           DST="release-artifacts"
-          DATE="${{ steps.ts.outputs.date }}"
           mkdir -p "$DST"
           for f in "$SRC"/*link_nn6000-v2*.bin "$SRC"/*link_nn6000-v2*.itb "$SRC"/*link_nn6000-v2*.manifest; do
             [ -e "$f" ] || continue
@@ -272,15 +255,15 @@ jobs:
 
       - name: Publish release
         if: success() && inputs.publish_release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           tag_name: ${{ steps.ts.outputs.tag }}
           target_commitish: ${{ github.sha }}
-          name: iStoreOS Link NN6000 v2 固件 ${{ steps.ts.outputs.human }}
+          name: iStoreOS Link NN6000 v2 Firmware ${{ steps.ts.outputs.human }}
           files: |
             release-artifacts/*
           body: |
-            ## iStoreOS Link NN6000 v2 固件
+            ## iStoreOS Link NN6000 v2 Firmware
 
             - **目标设备**: Link NN6000 v2
             - **平台**: qualcommax/ipq60xx (ipq6000)
