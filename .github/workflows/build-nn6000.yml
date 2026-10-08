@@ -15,6 +15,7 @@ on:
 
 permissions:
   contents: write
+  actions: write
 
 jobs:
   build:
@@ -163,6 +164,18 @@ jobs:
           kmod-macvlan
           nss-firmware-ipq60xx
           nss-eip-firmware
+          iperf3
+          wireguard-tools
+          luci-app-wireguard
+          tailscale
+          luci-app-tailscale
+          irqbalance
+          luci-app-sqm
+          luci-app-acme
+          kmod-ipt-nat6
+          luci-app-autoreboot
+          lucky
+          luci-app-lucky
           "
           MISSING=""
           for p in $HARD; do
@@ -223,7 +236,7 @@ jobs:
           M=$(ls "$OUT"/*link_nn6000-v2*.manifest 2>/dev/null | head -1)
           [ -n "$M" ] || { echo "::error::no manifest for link_nn6000-v2"; exit 1; }
           echo "::group::Manifest check: link_nn6000-v2"
-          for pkg in ipq-wifi-link_nn6000 quickstart luci-app-quickstart dockerd luci-app-dockerman luci-lib-docker f2fs-tools kmod-fs-f2fs kmod-ath11k-ahb kmod-qca-nss-drv kmod-qca-nss-ecm kmod-qca-nss-crypto kmod-pppoe kmod-macvlan nss-firmware-ipq60xx nss-eip-firmware; do
+          for pkg in ipq-wifi-link_nn6000 quickstart luci-app-quickstart dockerd luci-app-dockerman luci-lib-docker f2fs-tools kmod-fs-f2fs kmod-ath11k-ahb kmod-qca-nss-drv kmod-qca-nss-ecm kmod-qca-nss-crypto kmod-pppoe kmod-macvlan nss-firmware-ipq60xx nss-eip-firmware lucky luci-app-lucky; do
             if grep -q "^${pkg} " "$M"; then
               echo "  ok      $pkg"
             else
@@ -258,7 +271,6 @@ jobs:
         uses: softprops/action-gh-release@v3
         with:
           tag_name: ${{ steps.ts.outputs.tag }}
-          target_commitish: ${{ github.sha }}
           name: iStoreOS Link NN6000 v2 Firmware ${{ steps.ts.outputs.human }}
           files: |
             release-artifacts/*
@@ -270,5 +282,3 @@ jobs:
             - **iStoreOS 分支**: ${{ env.ISTOREOS_BRANCH }}
             - **iStoreOS 提交**: ${{ steps.info.outputs.commit_hash }} (${{ steps.info.outputs.commit_date }})
             - **编译日期**: ${{ steps.info.outputs.build_date }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
