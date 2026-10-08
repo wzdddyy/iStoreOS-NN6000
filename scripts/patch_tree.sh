@@ -136,6 +136,15 @@ cat > "$TMP/a_ubootenv" <<'EOF'
 	;;
 EOF
 
+# Anchors on the tail of the kmod-ipt-ipopt definition in modules/netfilter.mk:
+# inserting before it places the fragment after `$(call AddDepends/ipt)` and
+# still inside the define body, so DEPENDS+= survives the AddDepends := assign.
+cat > "$TMP/a_ipt_ipopt" <<'EOF'
+endef
+
+define KernelPackage/ipt-ipopt/description
+EOF
+
 P() {
 	_rel=$1; _tag=$2; _mode=$3; _anch=$4; _blk=$5; _inline=$6
 	_path="$ROOT/$_rel"
@@ -182,6 +191,9 @@ P "package/firmware/ipq-wifi/Makefile" \
 
 P "package/boot/uboot-tools/uboot-envtools/files/qualcommax_ipq60xx" \
   "ubootenv" "after" "a_ubootenv" "ubootenv.block" 0
+
+P "package/kernel/linux/modules/netfilter.mk" \
+  "ipt-ipopt-conntrack" "before" "a_ipt_ipopt" "iptipopt.block" 0
 
 P "target/linux/qualcommax/config-6.12" \
   "nss-kconfig" "append" "-" "kconfig.block" 0
