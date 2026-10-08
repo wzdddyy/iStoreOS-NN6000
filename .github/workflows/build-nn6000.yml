@@ -166,9 +166,9 @@ jobs:
           nss-eip-firmware
           iperf3
           wireguard-tools
-          luci-app-wireguard
+          luci-proto-wireguard
           tailscale
-          luci-app-tailscale
+          luci-app-tailscale-community
           irqbalance
           luci-app-sqm
           luci-app-acme
@@ -236,7 +236,7 @@ jobs:
           M=$(ls "$OUT"/*link_nn6000-v2*.manifest 2>/dev/null | head -1)
           [ -n "$M" ] || { echo "::error::no manifest for link_nn6000-v2"; exit 1; }
           echo "::group::Manifest check: link_nn6000-v2"
-          for pkg in ipq-wifi-link_nn6000 quickstart luci-app-quickstart dockerd luci-app-dockerman luci-lib-docker f2fs-tools kmod-fs-f2fs kmod-ath11k-ahb kmod-qca-nss-drv kmod-qca-nss-ecm kmod-qca-nss-crypto kmod-pppoe kmod-macvlan nss-firmware-ipq60xx nss-eip-firmware lucky luci-app-lucky; do
+          for pkg in ipq-wifi-link_nn6000 quickstart luci-app-quickstart dockerd luci-app-dockerman luci-lib-docker f2fs-tools kmod-fs-f2fs kmod-ath11k-ahb kmod-qca-nss-drv kmod-qca-nss-ecm kmod-qca-nss-crypto kmod-pppoe kmod-macvlan nss-firmware-ipq60xx nss-eip-firmware lucky luci-app-lucky luci-proto-wireguard luci-app-tailscale-community luci-app-autoreboot; do
             if grep -q "^${pkg} " "$M"; then
               echo "  ok      $pkg"
             else

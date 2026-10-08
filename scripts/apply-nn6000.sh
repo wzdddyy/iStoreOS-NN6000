@@ -32,12 +32,12 @@ for entry in "$REPO_DIR/files"/*; do
 		*)       cp -a "$entry" "$TREE/" ;;
 	esac
 done
-chmod 0755 "$TREE/package/quickstart/files/"*.init \
-           "$TREE/package/quickstart/files/"*.hotplug \
-           "$TREE/package/quickstart/files/"*.uci-default \
-           "$TREE/package/quickstart/files/dhcpvalid.sh" \
-           "$TREE/package/luci-app-quickstart/root/etc/uci-defaults/50_luci-quickstart" \
-           "$TREE/package/luci-app-quickstart/root/usr/libexec/quickstart/auto_setup.sh" 2>/dev/null || true
+chmod 0755 "$TREE/package/luci/quickstart/files/"*.init \
+           "$TREE/package/luci/quickstart/files/"*.hotplug \
+           "$TREE/package/luci/quickstart/files/"*.uci-default \
+           "$TREE/package/luci/quickstart/files/dhcpvalid.sh" \
+           "$TREE/package/luci/luci-app-quickstart/root/etc/uci-defaults/50_luci-quickstart" \
+           "$TREE/package/luci/luci-app-quickstart/root/usr/libexec/quickstart/auto_setup.sh" 2>/dev/null || true
 
 chmod 0755 "$TREE/files/usr/bin/cpuinfo" \
            "$TREE/files/usr/bin/tempinfo" \
@@ -109,11 +109,7 @@ check "skb debug header"             test -f "$TREE/target/linux/qualcommax/file
 check "nf_conntrack_dscpremark_ext header" test -f "$TREE/target/linux/qualcommax/files/include/net/netfilter/nf_conntrack_dscpremark_ext.h"
 check "nf_conntrack_dscpremark_ext source" test -f "$TREE/target/linux/qualcommax/files/net/netfilter/nf_conntrack_dscpremark_ext.c"
 CR=$(printf '\r')
-if grep -rIl "$CR" "$TREE/package/quickstart" "$TREE/package/luci-app-quickstart" \
-              "$TREE/package/qca-nss-drv" "$TREE/package/qca-nss-ecm" \
-              "$TREE/package/qca-nss-crypto" "$TREE/package/nss-firmware" \
-              "$TREE/package/nss-eip-firmware" \
-              "$TREE/package/luci-app-dockerman" "$TREE/package/luci-lib-docker" \
+if grep -rIl "$CR" "$TREE/package/nss" "$TREE/package/luci" \
               "$TREE/target/linux/qualcommax/patches-6.12" \
               "$TREE/target/linux/qualcommax/files/net/core" \
               "$TREE/target/linux/qualcommax/files/net/netfilter" \
