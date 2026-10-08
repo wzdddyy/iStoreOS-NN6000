@@ -4,8 +4,18 @@
 CPUINFO_PATH="/proc/cpuinfo"
 CPUFREQ_PATH="/sys/devices/system/cpu/cpufreq"
 
-cpu_arch="$(awk -F ': ' '/model name/ {print $2; exit}' "$CPUINFO_PATH")"
-[ -n "$cpu_arch" ] || cpu_arch="$(uname -m)"
+# ARM64 /proc/cpuinfo has no "model name" field; construct from CPU fields
+cpu_arch="$(awk -F ': ' '/^CPU architecture/ {print $2; exit}' "$CPUINFO_PATH")"
+cpu_rev="$(awk -F ': ' '/^CPU revision/ {print $2; exit}' "$CPUINFO_PATH")"
+
+if [ -n "$cpu_arch" ]; then
+	cpu_arch_name="ARMv${cpu_arch}"
+	[ "$cpu_arch" = "8" ] && cpu_arch_name="ARMv8 Processor rev ${cpu_rev:-0} (v${cpu_arch}l)"
+else
+	cpu_arch_name="$(awk -F ': ' '/model name/ {print $2; exit}' "$CPUINFO_PATH")"
+	[ -n "$cpu_arch_name" ] || cpu_arch_name="$(uname -m)"
+fi
+
 cpu_cores="$(grep -c processor "$CPUINFO_PATH")"
 
 cpu_freq=""
@@ -21,7 +31,7 @@ for policy in "$CPUFREQ_PATH"/policy*; do
 done
 
 if [ -n "$cpu_freq" ]; then
-	printf '%s x %s (%s)' "$cpu_arch" "$cpu_cores" "$cpu_freq"
+	printf '%s x %s (%s)' "$cpu_arch_name" "$cpu_cores" "$cpu_freq"
 else
-	printf '%s x %s' "$cpu_arch" "$cpu_cores"
+	printf '%s x %s' "$cpu_arch_name" "$cpu_cores"
 fi

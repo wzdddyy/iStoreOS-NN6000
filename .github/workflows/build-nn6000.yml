@@ -95,11 +95,15 @@ jobs:
         run: |
           set -o pipefail
           ./scripts/feeds update -a
-          # luci-app-dockerman / luci-lib-docker are vendored in-tree under
-          # package/ (lisaac originals). Drop the luci feed copies to avoid
-          # duplicate package definitions, then regenerate the feed indexes
-          # so install never resolves against the deleted paths.
-          rm -rf feeds/luci/applications/luci-app-dockerman feeds/luci/libs/luci-lib-docker
+          # luci-app-dockerman / luci-lib-docker / luci-app-ttyd /
+          # luci-app-hd-idle / luci-app-minidlna / luci-app-samba4 are vendored
+          # in-tree under package/ (lisaac originals + ImmortalWrt fork for
+          # ttyd, which puts the terminal in System instead of Services; the
+          # three NAS packages are moved to the Network Storage menu).
+          # Drop the luci feed copies to avoid duplicate package definitions,
+          # then regenerate the feed indexes so install never resolves against
+          # the deleted paths.
+          rm -rf feeds/luci/applications/luci-app-dockerman feeds/luci/libs/luci-lib-docker feeds/luci/applications/luci-app-ttyd feeds/luci/applications/luci-app-hd-idle feeds/luci/applications/luci-app-minidlna feeds/luci/applications/luci-app-samba4
           ./scripts/feeds update -i
           ./scripts/feeds install -a
 
@@ -147,6 +151,7 @@ jobs:
           block-mount
           lsblk
           parted
+          fdisk
           luci
           luci-app-firewall
           luci-theme-argon
@@ -156,6 +161,10 @@ jobs:
           dockerd
           ttyd
           luci-app-ttyd
+          luci-app-mini-diskmanager
+          luci-app-hd-idle
+          luci-app-minidlna
+          luci-app-samba4
           kmod-tun
           kmod-qca-nss-drv
           kmod-qca-nss-ecm
@@ -236,7 +245,7 @@ jobs:
           M=$(ls "$OUT"/*link_nn6000-v2*.manifest 2>/dev/null | head -1)
           [ -n "$M" ] || { echo "::error::no manifest for link_nn6000-v2"; exit 1; }
           echo "::group::Manifest check: link_nn6000-v2"
-          for pkg in ipq-wifi-link_nn6000 quickstart luci-app-quickstart dockerd luci-app-dockerman luci-lib-docker f2fs-tools kmod-fs-f2fs kmod-ath11k-ahb kmod-qca-nss-drv kmod-qca-nss-ecm kmod-qca-nss-crypto kmod-pppoe kmod-macvlan nss-firmware-ipq60xx nss-eip-firmware lucky luci-app-lucky luci-proto-wireguard luci-app-tailscale-community luci-app-autoreboot; do
+          for pkg in ipq-wifi-link_nn6000 quickstart luci-app-quickstart dockerd luci-app-dockerman luci-lib-docker f2fs-tools kmod-fs-f2fs kmod-ath11k-ahb kmod-qca-nss-drv kmod-qca-nss-ecm kmod-qca-nss-crypto kmod-pppoe kmod-macvlan nss-firmware-ipq60xx nss-eip-firmware lucky luci-app-lucky luci-proto-wireguard luci-app-tailscale-community luci-app-autoreboot luci-app-mini-diskmanager luci-app-hd-idle luci-app-minidlna luci-app-samba4; do
             if grep -q "^${pkg} " "$M"; then
               echo "  ok      $pkg"
             else

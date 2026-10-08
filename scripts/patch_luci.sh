@@ -38,14 +38,14 @@ if ! grep -q 'getCPUInfo' "$UCODE"; then
 		}
 	},
 	getCPUUsage: {
-		call: function(request) {
-			const fd = popen('/bin/sh /usr/bin/cpuusage 2>/dev/null');
-			const data = fd ? trim(fd.read('all')) : null;
-			if (fd)
-				fd.close();
-			return { cpuusage: data || null };
-		}
-	},
+			call: function(request) {
+				const fd = popen('/bin/sh /usr/bin/cpuusage 2>/dev/null');
+				const data = fd ? trim(fd.read('all')) : null;
+				if (fd)
+					fd.close();
+				return { cpuusage: data || null };
+			}
+		},
 EOF
 	sed -i "/^const methods = {$/r $TMP" "$UCODE"
 	rm -f "$TMP"

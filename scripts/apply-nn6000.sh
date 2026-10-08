@@ -41,7 +41,9 @@ chmod 0755 "$TREE/package/luci/quickstart/files/"*.init \
 
 chmod 0755 "$TREE/files/usr/bin/cpuinfo" \
            "$TREE/files/usr/bin/tempinfo" \
-           "$TREE/files/usr/bin/cpuusage" 2>/dev/null || true
+           "$TREE/files/usr/bin/cpuusage" \
+           "$TREE/package/luci/luci-app-mini-diskmanager/root/etc/uci-defaults/setup_prm.sh" \
+           "$TREE/package/luci/luci-app-mini-diskmanager/root/usr/libexec/rpcd/minidiskmanager" 2>/dev/null || true
 
 echo "==> [2/3] Patching existing tree files"
 sh "$SCRIPT_DIR/patch_tree.sh" "$TREE" "$REPO_DIR/blocks"
@@ -69,6 +71,7 @@ refute() {
 check "DTS v1 present"               test -f "$TREE/target/linux/qualcommax/files/arch/arm64/boot/dts/qcom/ipq6000-nn6000-v1.dts"
 check "DTS v2 present"               test -f "$TREE/target/linux/qualcommax/files/arch/arm64/boot/dts/qcom/ipq6000-nn6000-v2.dts"
 check "DTS shared dtsi present"      test -f "$TREE/target/linux/qualcommax/files/arch/arm64/boot/dts/qcom/ipq6000-link.dtsi"
+check "DTS nss dtsi present"         test -f "$TREE/target/linux/qualcommax/files/arch/arm64/boot/dts/qcom/ipq6018-nss.dtsi"
 check "image definition v1"          grep -q 'Device/link_nn6000-v1' "$TREE/target/linux/qualcommax/image/ipq60xx.mk"
 check "image definition v2"          grep -q 'TARGET_DEVICES += link_nn6000-v2' "$TREE/target/linux/qualcommax/image/ipq60xx.mk"
 check "02_network v1 case"           grep -q 'link,nn6000-v1' "$TREE/target/linux/qualcommax/ipq60xx/base-files/etc/board.d/02_network"
@@ -83,6 +86,11 @@ check "vendored luci-app-quickstart" test -f "$TREE/package/luci/luci-app-quicks
 check "loop overlay boot script"    grep -q '_get_overlay_partition_loop' "$TREE/package/base-files/files/lib/functions/istoreos-boot.sh"
 check "vendored luci-app-dockerman"  test -f "$TREE/package/luci/luci-app-dockerman/Makefile"
 check "vendored luci-lib-docker"     test -f "$TREE/package/luci/luci-lib-docker/Makefile"
+check "vendored luci-app-ttyd"       test -f "$TREE/package/luci/luci-app-ttyd/Makefile"
+check "vendored luci-app-mini-diskmanager" test -f "$TREE/package/luci/luci-app-mini-diskmanager/Makefile"
+check "vendored luci-app-hd-idle"    test -f "$TREE/package/luci/luci-app-hd-idle/Makefile"
+check "vendored luci-app-minidlna"   test -f "$TREE/package/luci/luci-app-minidlna/Makefile"
+check "vendored luci-app-samba4"     test -f "$TREE/package/luci/luci-app-samba4/Makefile"
 check "overview cpuinfo script"     test -f "$TREE/files/usr/bin/cpuinfo"
 check "overview tempinfo script"    test -f "$TREE/files/usr/bin/tempinfo"
 check "overview cpuusage script"    test -f "$TREE/files/usr/bin/cpuusage"
@@ -114,6 +122,7 @@ if grep -rIl "$CR" "$TREE/package/nss" "$TREE/package/luci" \
               "$TREE/target/linux/qualcommax/files/net/core" \
               "$TREE/target/linux/qualcommax/files/net/netfilter" \
               "$TREE/target/linux/qualcommax/files/include/net/netfilter" \
+              "$TREE/target/linux/qualcommax/files/arch/arm64/boot/dts/qcom" \
               "$REPO_DIR/blocks" "$SCRIPT_DIR" >/dev/null 2>&1; then
 	echo "  FAIL  vendored packages/patches contain CRLF line endings" >&2
 	exit 1
@@ -125,7 +134,7 @@ echo
 echo "NN6000 port applied successfully."
 echo "Next steps (in $TREE):"
 echo "  ./scripts/feeds update -a"
-echo "  rm -rf feeds/luci/applications/luci-app-dockerman feeds/luci/libs/luci-lib-docker"
+echo "  rm -rf feeds/luci/applications/luci-app-dockerman feeds/luci/libs/luci-lib-docker feeds/luci/applications/luci-app-ttyd feeds/luci/applications/luci-app-hd-idle feeds/luci/applications/luci-app-minidlna feeds/luci/applications/luci-app-samba4"
 echo "  ./scripts/feeds update -i && ./scripts/feeds install -a"
 echo "  sh $SCRIPT_DIR/patch_luci.sh ."
 echo "  cat $REPO_DIR/config/nn6000.seed > .config && make defconfig"
