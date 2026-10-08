@@ -58,7 +58,7 @@ check() {
 		exit 1
 	fi
 }
-# inverse check: passes when the command fails (pattern absent)
+
 refute() {
 	desc="$1"; shift
 	if "$@" >/dev/null 2>&1; then
@@ -111,6 +111,7 @@ check "ECM PPTP gated by kmod-pptp"  grep -qF 'CONFIG_PACKAGE_kmod-pptp' "$TREE/
 refute "ECM PPTP decoupled from pppoe"  grep -qF 'PACKAGE_kmod-pppoe:kmod-pptp' "$TREE/package/nss/qca-nss-ecm/Makefile"
 refute "ECM L2TPv2 decoupled from pppoe" grep -qF 'PACKAGE_kmod-pppoe:kmod-pppol2tp' "$TREE/package/nss/qca-nss-ecm/Makefile"
 check "NSS kernel config fragment"   grep -q 'NN6000 nss-kconfig' "$TREE/target/linux/qualcommax/config-6.12"
+check "ipt-ipopt conntrack dep"      grep -q 'NN6000 ipt-ipopt-conntrack' "$TREE/package/kernel/linux/modules/netfilter.mk"
 check "skb recycler header"          test -f "$TREE/target/linux/qualcommax/files/net/core/skbuff_recycle.h"
 check "skb recycler source"          test -f "$TREE/target/linux/qualcommax/files/net/core/skbuff_recycle.c"
 check "skb debug header"             test -f "$TREE/target/linux/qualcommax/files/net/core/skbuff_debug.h"
