@@ -56,6 +56,16 @@ check() {
 		exit 1
 	fi
 }
+# inverse check: passes when the command fails (pattern absent)
+refute() {
+	desc="$1"; shift
+	if "$@" >/dev/null 2>&1; then
+		echo "  FAIL  $desc" >&2
+		exit 1
+	else
+		echo "  ok    $desc"
+	fi
+}
 check "DTS v1 present"               test -f "$TREE/target/linux/qualcommax/files/arch/arm64/boot/dts/qcom/ipq6000-nn6000-v1.dts"
 check "DTS v2 present"               test -f "$TREE/target/linux/qualcommax/files/arch/arm64/boot/dts/qcom/ipq6000-nn6000-v2.dts"
 check "DTS shared dtsi present"      test -f "$TREE/target/linux/qualcommax/files/arch/arm64/boot/dts/qcom/ipq6000-link.dtsi"
@@ -83,9 +93,15 @@ check "vendored qca-nss-crypto"      test -f "$TREE/package/qca-nss-crypto/Makef
 check "vendored nss-firmware"        test -f "$TREE/package/nss-firmware/Makefile"
 check "vendored nss-eip-firmware"    test -f "$TREE/package/nss-eip-firmware/Makefile"
 check "NSS kernel patches copied"    test -f "$TREE/target/linux/qualcommax/patches-6.12/0600-1-qca-nss-ecm-support-CORE.patch" \
+                              -a -f "$TREE/target/linux/qualcommax/patches-6.12/0600-2-qca-nss-ecm-support-PPPOE-offload.patch" \
                               -a -f "$TREE/target/linux/qualcommax/patches-6.12/0602-1-qca-nss-drv-add-qdisc-support.patch" \
                               -a -f "$TREE/target/linux/qualcommax/patches-6.12/0606-1-qca-nss-ecm-bridge-Fixes-for-Bridge-VLAN-Filtering.patch" \
                               -a -f "$TREE/target/linux/qualcommax/patches-6.12/0981-1-qca-skb_recycler-support.patch"
+check "0600-2 lockless ppp symbols"  grep -q '__ppp_is_multilink' "$TREE/target/linux/qualcommax/patches-6.12/0600-2-qca-nss-ecm-support-PPPOE-offload.patch"
+check "0600-2 lockless ppp channels" grep -q '__ppp_hold_channels' "$TREE/target/linux/qualcommax/patches-6.12/0600-2-qca-nss-ecm-support-PPPOE-offload.patch"
+check "ECM PPTP gated by kmod-pptp"  grep -qF 'CONFIG_PACKAGE_kmod-pptp' "$TREE/package/qca-nss-ecm/Makefile"
+refute "ECM PPTP decoupled from pppoe"  grep -qF 'PACKAGE_kmod-pppoe:kmod-pptp' "$TREE/package/qca-nss-ecm/Makefile"
+refute "ECM L2TPv2 decoupled from pppoe" grep -qF 'PACKAGE_kmod-pppoe:kmod-pppol2tp' "$TREE/package/qca-nss-ecm/Makefile"
 check "NSS kernel config fragment"   grep -q 'NN6000 nss-kconfig' "$TREE/target/linux/qualcommax/config-6.12"
 check "skb recycler header"          test -f "$TREE/target/linux/qualcommax/files/net/core/skbuff_recycle.h"
 check "skb recycler source"          test -f "$TREE/target/linux/qualcommax/files/net/core/skbuff_recycle.c"
@@ -98,19 +114,23 @@ if grep -rIl "$CR" "$TREE/package/quickstart" "$TREE/package/luci-app-quickstart
               "$TREE/package/qca-nss-crypto" "$TREE/package/nss-firmware" \
               "$TREE/package/nss-eip-firmware" \
               "$TREE/package/luci-app-dockerman" "$TREE/package/luci-lib-docker" \
+              "$TREE/target/linux/qualcommax/patches-6.12" \
               "$TREE/target/linux/qualcommax/files/net/core" \
               "$TREE/target/linux/qualcommax/files/net/netfilter" \
-              "$TREE/target/linux/qualcommax/files/include/net/netfilter" >/dev/null 2>&1; then
-	echo "  FAIL  vendored packages contain CRLF line endings" >&2
+              "$TREE/target/linux/qualcommax/files/include/net/netfilter" \
+              "$REPO_DIR/blocks" "$SCRIPT_DIR" >/dev/null 2>&1; then
+	echo "  FAIL  vendored packages/patches contain CRLF line endings" >&2
 	exit 1
 else
-	echo "  ok    vendored packages use LF line endings"
+	echo "  ok    vendored packages/patches/scripts use LF line endings"
 fi
 
 echo
 echo "NN6000 port applied successfully."
-echo "Next steps:"
-echo "  cd $TREE"
-echo "  ./scripts/feeds update -a && ./scripts/feeds install -a"
-echo "  cat /path/to/nn6000.seed > .config && make defconfig"
+echo "Next steps (in $TREE):"
+echo "  ./scripts/feeds update -a"
+echo "  rm -rf feeds/luci/applications/luci-app-dockerman feeds/luci/libs/luci-lib-docker"
+echo "  ./scripts/feeds update -i && ./scripts/feeds install -a"
+echo "  sh $SCRIPT_DIR/patch_luci.sh ."
+echo "  cat $REPO_DIR/config/nn6000.seed > .config && make defconfig"
 echo "  make -j\$(nproc)"

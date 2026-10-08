@@ -16,7 +16,7 @@ if [ ! -f "$ROOT/target/linux/qualcommax/Makefile" ]; then
 fi
 
 TMP=$(mktemp -d 2>/dev/null || mktemp -d -t nn6000)
-trap 'rm -rf "$TMP"' EXIT INT TERM
+trap 'rm -rf "$TMP"' EXIT
 
 cat > "$TMP/prog.awk" <<'AWKEOF'
 BEGIN {
@@ -141,6 +141,10 @@ P() {
 	_path="$ROOT/$_rel"
 	if [ ! -f "$_path" ]; then
 		echo "ERROR: target file not found (wrong iStoreOS version?): $_rel" >&2
+		exit 1
+	fi
+	if [ ! -f "$BLOCKS/$_blk" ]; then
+		echo "ERROR: block fragment not found: $BLOCKS/$_blk" >&2
 		exit 1
 	fi
 	_ancharg=""

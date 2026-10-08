@@ -1,19 +1,6 @@
 #!/bin/sh
 # NN6000 port: post-feeds patch that teaches the luci rpcd object about CPU
-# info/usage/temperature, so the LuCI overview can display them.
-#
-# iStoreOS's jjm2473/luci fork lacks the ImmortalWrt extensions
-# (getCPUInfo/getTempInfo/getCPUUsage) both in the rpcd ucode script and in
-# the luci-mod-status-index ACL. The UI half is shipped as a files/ overlay
-# (www/.../10_system.js); the data half is injected here after feeds install:
-#
-#   1. feeds/luci/modules/luci-base/root/usr/share/rpcd/ucode/luci
-#        -> insert the three methods right after "const methods = {"
-#   2. feeds/luci/modules/luci-mod-status/root/usr/share/rpcd/acl.d/
-#      luci-mod-status-index.json
-#        -> grant the three methods to the status page session
-#
-# Both edits are idempotent and verified before exiting.
+
 set -eu
 
 if [ $# -ne 1 ]; then
@@ -30,7 +17,7 @@ ACL="$TREE/feeds/luci/modules/luci-mod-status/root/usr/share/rpcd/acl.d/luci-mod
 
 if ! grep -q 'getCPUInfo' "$UCODE"; then
 	TMP="$(mktemp)"
-	trap 'rm -f "$TMP"' EXIT INT TERM
+	trap 'rm -f "$TMP"' EXIT
 	cat >"$TMP" <<'EOF'
 	getCPUInfo: {
 		call: function(request) {
@@ -62,7 +49,7 @@ if ! grep -q 'getCPUInfo' "$UCODE"; then
 EOF
 	sed -i "/^const methods = {$/r $TMP" "$UCODE"
 	rm -f "$TMP"
-	trap - EXIT INT TERM
+	trap - EXIT
 	echo "  patched rpcd ucode (getCPUInfo/getTempInfo/getCPUUsage)"
 fi
 
