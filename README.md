@@ -1,7 +1,7 @@
 ## iStoreOS for Link NN6000 v2
 
 基于 [iStoreOS](https://github.com/istoreos) `25.12` 分支，适配 **Link NN6000 系列（IPQ6000，eMMC）** 
-带满血NSS驱动。
+内核分区 12m，带满血NSS驱动。
 
 ## 推荐分区
 
@@ -13,13 +13,16 @@
 | --- | --- |
 | 管理地址 | http://192.168.100.1 |
 | 用户名 | root |
-| 密码 | password |
+| 密码 | 空 |
 
 ## 内置软件
 
 * **iStoreOS 应用商店**：luci-app-store，store商店；
 * **Quickstart 快速引导**：开机向导，自动配置上网；
 * **Docker**：docker / dockerd / luci-app-dockerman；
+* **lucky**：端口转发 + 反向代理 + DDNS + Web服务 + 网络唤醒；
+* **tailscale**：免费好用VPN异地组网；
+* **mini-diskmanager**：磁盘管理工具；
 * **磁盘工具**：lsblk / parted / e2fsprogs / smartmontools；
 * **文件系统**：kmod-fs-f2fs / f2fs-tools / kmod-fs-ext4；
 
