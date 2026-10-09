@@ -169,6 +169,26 @@ jobs:
           kmod-qca-nss-drv
           kmod-qca-nss-ecm
           kmod-qca-nss-crypto
+          kmod-qca-nss-drv-bridge-mgr
+          kmod-qca-nss-drv-eogremgr
+          kmod-qca-nss-drv-gre
+          kmod-qca-nss-drv-igs
+          kmod-qca-nss-drv-l2tpv2
+          kmod-qca-nss-drv-lag-mgr
+          kmod-qca-nss-drv-map-t
+          kmod-qca-nss-drv-match
+          kmod-qca-nss-drv-mirror
+          kmod-qca-nss-drv-netlink
+          kmod-qca-nss-drv-pppoe
+          kmod-qca-nss-drv-pptp
+          kmod-qca-nss-drv-qdisc
+          kmod-qca-nss-drv-tun6rd
+          kmod-qca-nss-drv-tunipip6
+          kmod-qca-nss-drv-vlan-mgr
+          kmod-qca-nss-drv-vxlanmgr
+          kmod-qca-nss-drv-wifi-meshmgr
+          kmod-qca-mcs
+          kmod-nss-ifb
           kmod-pppoe
           kmod-macvlan
           nss-firmware-ipq60xx
@@ -180,7 +200,6 @@ jobs:
           luci-app-tailscale-community
           irqbalance
           luci-app-sqm
-          luci-app-acme
           kmod-ipt-nat6
           luci-app-autoreboot
           lucky
@@ -245,7 +264,7 @@ jobs:
           M=$(ls "$OUT"/*link_nn6000-v2*.manifest 2>/dev/null | head -1)
           [ -n "$M" ] || { echo "::error::no manifest for link_nn6000-v2"; exit 1; }
           echo "::group::Manifest check: link_nn6000-v2"
-          for pkg in ipq-wifi-link_nn6000 quickstart luci-app-quickstart dockerd luci-app-dockerman luci-lib-docker f2fs-tools kmod-fs-f2fs kmod-ath11k-ahb kmod-qca-nss-drv kmod-qca-nss-ecm kmod-qca-nss-crypto kmod-pppoe kmod-macvlan nss-firmware-ipq60xx nss-eip-firmware lucky luci-app-lucky luci-proto-wireguard luci-app-tailscale-community luci-app-autoreboot luci-app-mini-diskmanager luci-app-hd-idle luci-app-minidlna luci-app-samba4; do
+          for pkg in ipq-wifi-link_nn6000 quickstart luci-app-quickstart dockerd luci-app-dockerman luci-lib-docker f2fs-tools kmod-fs-f2fs kmod-ath11k-ahb kmod-qca-nss-drv kmod-qca-nss-ecm kmod-qca-nss-crypto kmod-qca-nss-drv-bridge-mgr kmod-qca-nss-drv-eogremgr kmod-qca-nss-drv-gre kmod-qca-nss-drv-igs kmod-qca-nss-drv-l2tpv2 kmod-qca-nss-drv-lag-mgr kmod-qca-nss-drv-map-t kmod-qca-nss-drv-match kmod-qca-nss-drv-mirror kmod-qca-nss-drv-netlink kmod-qca-nss-drv-pppoe kmod-qca-nss-drv-pptp kmod-qca-nss-drv-qdisc kmod-qca-nss-drv-tun6rd kmod-qca-nss-drv-tunipip6 kmod-qca-nss-drv-vlan-mgr kmod-qca-nss-drv-vxlanmgr kmod-qca-nss-drv-wifi-meshmgr kmod-qca-mcs kmod-nss-ifb kmod-pppoe kmod-macvlan nss-firmware-ipq60xx nss-eip-firmware lucky luci-app-lucky luci-proto-wireguard luci-app-tailscale-community luci-app-autoreboot luci-app-mini-diskmanager luci-app-hd-idle luci-app-minidlna luci-app-samba4; do
             if grep -q "^${pkg} " "$M"; then
               echo "  ok      $pkg"
             else
