@@ -21,7 +21,7 @@
 * **Quickstart 快速引导**：开机向导，自动配置上网；
 * **Docker**：docker / dockerd / luci-app-dockerman；
 * **lucky**：端口转发 + 反向代理 + DDNS + Web服务 + 网络唤醒；
-* **tailscale**：免费好用VPN异地组网；
+* **tailscale**：VPN异地组网；
 * **mini-diskmanager**：磁盘管理工具；
 * **磁盘工具**：lsblk / parted / e2fsprogs / smartmontools；
 * **文件系统**：kmod-fs-f2fs / f2fs-tools / kmod-fs-ext4；
