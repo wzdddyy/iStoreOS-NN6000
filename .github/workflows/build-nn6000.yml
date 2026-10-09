@@ -275,22 +275,22 @@ jobs:
           echo "::endgroup::"
           exit $FAIL
 
-      - name: Stage release artifacts with date prefix
+      - name: Stage release artifacts with timestamp prefix
         id: ts
         if: success() && inputs.publish_release
         run: |
           set -o pipefail
-          echo "tag=rel-nn6000-$(TZ=Asia/Shanghai date +%Y%m%d-%H%M)" >> "$GITHUB_OUTPUT"
+          STAMP="$(TZ=Asia/Shanghai date +%y.%m.%d_%H.%M.%S)"
+          echo "stamp=$STAMP" >> "$GITHUB_OUTPUT"
+          echo "tag=rel-nn6000-${STAMP}" >> "$GITHUB_OUTPUT"
           echo "human=$(TZ=Asia/Shanghai date '+%Y-%m-%d %H:%M')" >> "$GITHUB_OUTPUT"
-          DATE="$(TZ=Asia/Shanghai date +%Y%m%d)"
-          echo "date=$DATE" >> "$GITHUB_OUTPUT"
 
           SRC="istoreos/bin/targets/qualcommax/ipq60xx"
           DST="release-artifacts"
           mkdir -p "$DST"
           for f in "$SRC"/*link_nn6000-v2*.bin "$SRC"/*link_nn6000-v2*.itb "$SRC"/*link_nn6000-v2*.manifest; do
             [ -e "$f" ] || continue
-            cp "$f" "$DST/${DATE}-$(basename "$f")"
+            cp "$f" "$DST/${STAMP}-$(basename "$f")"
           done
           ls -lh "$DST"
 
