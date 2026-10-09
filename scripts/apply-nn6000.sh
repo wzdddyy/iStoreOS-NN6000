@@ -117,6 +117,26 @@ check "skb recycler source"          test -f "$TREE/target/linux/qualcommax/file
 check "skb debug header"             test -f "$TREE/target/linux/qualcommax/files/net/core/skbuff_debug.h"
 check "nf_conntrack_dscpremark_ext header" test -f "$TREE/target/linux/qualcommax/files/include/net/netfilter/nf_conntrack_dscpremark_ext.h"
 check "nf_conntrack_dscpremark_ext source" test -f "$TREE/target/linux/qualcommax/files/net/netfilter/nf_conntrack_dscpremark_ext.c"
+check "vendored qca-nss-clients"     test -f "$TREE/package/nss/qca-nss-clients/Makefile"
+check "vendored qca-mcs"             test -f "$TREE/package/nss/qca-mcs/Makefile"
+check "vendored nss-ifb"             test -f "$TREE/package/nss/nss-ifb/Makefile"
+check "vendored qca-nss-cfi"         test -f "$TREE/package/nss/qca-nss-cfi/Makefile"
+check "nss-clients bridge-mgr subpkg" grep -q 'qca-nss-drv-bridge-mgr' "$TREE/package/nss/qca-nss-clients/Makefile"
+check "nss-clients vlan-mgr subpkg"  grep -q 'qca-nss-drv-vlan-mgr' "$TREE/package/nss/qca-nss-clients/Makefile"
+check "nss-clients front-end patches" test -f "$TREE/target/linux/qualcommax/patches-6.12/0603-1-qca-nss-clients-add-qdisc-support.patch" \
+                              -a -f "$TREE/target/linux/qualcommax/patches-6.12/0603-6-qca-nss-clients-add-bridge-mgr-support.patch" \
+                              -a -f "$TREE/target/linux/qualcommax/patches-6.12/0604-1-qca-add-mcs-support.patch" \
+                              -a -f "$TREE/target/linux/qualcommax/patches-6.12/0605-1-qca-nss-cfi-support.patch" \
+                              -a -f "$TREE/target/linux/qualcommax/patches-6.12/0607-1-qca-nss-clients-iptunnel-fixes.patch"
+check "skb notifier header"          test -f "$TREE/target/linux/qualcommax/files/net/core/skbuff_notifier.h"
+check "skb notifier source"          test -f "$TREE/target/linux/qualcommax/files/net/core/skbuff_notifier.c"
+check "skb debug source"             test -f "$TREE/target/linux/qualcommax/files/net/core/skbuff_debug.c"
+check "nss mirred uapi header"       test -f "$TREE/target/linux/qualcommax/files/include/uapi/linux/tc_act/tc_nss_mirred.h"
+check "qca-nss-dp pinned to 6.12 ref" grep -q '6a5c4716ca258d67202fc7964c9294dfefa3ccfa' "$TREE/package/kernel/qca-nss-dp/Makefile"
+check "qca-ssdk log patch"           test -f "$TREE/package/kernel/qca-ssdk/patches/0012-suppress-noisy-error-log.patch"
+check "seed ships nss front-ends"    grep -q 'CONFIG_PACKAGE_kmod-qca-nss-drv-bridge-mgr=y' "$REPO_DIR/config/nn6000.seed"
+check "seed enables bridge feature"  grep -q 'CONFIG_NSS_DRV_BRIDGE_ENABLE=y' "$REPO_DIR/config/nn6000.seed"
+check "seed enables vlan feature"    grep -q 'CONFIG_NSS_DRV_VLAN_ENABLE=y' "$REPO_DIR/config/nn6000.seed"
 CR=$(printf '\r')
 if grep -rIl "$CR" "$TREE/package/nss" "$TREE/package/luci" \
               "$TREE/target/linux/qualcommax/patches-6.12" \

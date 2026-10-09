@@ -15,6 +15,24 @@
 #include <dt-bindings/leds/common.h>
 
 / {
+	reserved-memory {
+		#address-cells = <2>;
+		#size-cells = <2>;
+		ranges;
+
+		/* Panic log survives warm reboot; read via /sys/fs/pstore.
+		 * Same address/size as immortalwrt ipq6018 ramoops_region.
+		 * Lies past q6_region end (0x4ab00000+0x3700000=0x4e200000). */
+		ramoops_region: ramoops@4ed00000 {
+			compatible = "ramoops";
+			reg = <0x0 0x4ed00000 0x0 0x100000>;
+			no-map;
+
+			record-size = <0x4000>;
+			console-size = <0x4000>;
+		};
+	};
+
 	aliases {
 		serial0 = &blsp1_uart3;
 		led-boot = &led_status_red;

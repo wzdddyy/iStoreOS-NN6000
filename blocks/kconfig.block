@@ -4,3 +4,13 @@ CONFIG_SKB_RECYCLER_MULTI_CPU=y
 # CONFIG_SKB_RECYCLER_PREALLOC is not set
 CONFIG_SKB_RECYCLE_SIZE=2304
 # CONFIG_ALLOC_SKB_PAGE_FRAG_DISABLE is not set
+
+# Panic log capture via ramoops (DTS node in ipq6000-link.dtsi).
+# NOTE: even immortalwrt ships the node without enabling PSTORE; we enable it
+# for WAN-crash diagnostics. Read after reboot: /sys/fs/pstore/console-ramoops-0
+CONFIG_PSTORE=y
+CONFIG_PSTORE_CONSOLE=y
+CONFIG_PSTORE_RAM=y
+CONFIG_REED_SOLOMON=y
+CONFIG_REED_SOLOMON_ENC8=y
+CONFIG_REED_SOLOMON_DEC8=y

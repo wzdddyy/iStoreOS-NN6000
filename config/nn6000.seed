@@ -151,21 +151,75 @@ CONFIG_PACKAGE_zoneinfo-asia=y
 CONFIG_PACKAGE_kmod-tun=y
 
 # --- QCA NSS hardware acceleration ------------------------------------------
-# Vendored packages: files/package/{qca-nss-drv,qca-nss-ecm,qca-nss-crypto,
-# nss-firmware,nss-eip-firmware} (qosmio/nss-packages @ 0d970db, NSS-12.5-K6.x).
+# Vendored packages: files/package/nss/* (qosmio/nss-packages @ 0d970db,
+# NSS-12.5-K6.x) + files/package/kernel/{qca-nss-dp,qca-ssdk} pinned to the
+# versions immortalwrt(VIKINGYFY) 6.12 shipped (qca-nss-dp 2026-03-13).
+#
+# The kernel-side NSS dataplane (qca-nss-dp) funnels every physical port into
+# the NSS firmware, so the firmware-side feature set and the userspace front-end
+# modules (qca-nss-clients) must match what the DTS declares in
+# ipq6018-nss.dtsi. Installing only qca-nss-drv + qca-nss-ecm leaves the
+# bridge/VLAN/qdisc front-ends absent while the DTS still advertises those
+# features to the NSS firmware.
+CONFIG_PACKAGE_kmod-qca-nss-dp=y
+CONFIG_PACKAGE_nss-firmware=y
+CONFIG_PACKAGE_nss-eip-firmware=y
 CONFIG_PACKAGE_kmod-qca-nss-drv=y
 CONFIG_PACKAGE_kmod-qca-nss-ecm=y
 CONFIG_PACKAGE_kmod-qca-nss-crypto=y
-CONFIG_PACKAGE_nss-firmware=y
-CONFIG_PACKAGE_nss-eip-firmware=y
+CONFIG_PACKAGE_kmod-qca-nss-cfi-cryptoapi=y
+
+# qca-nss-clients front-ends (immortalwrt qualcommax DEFAULT_PACKAGES set).
+CONFIG_PACKAGE_kmod-qca-nss-drv-bridge-mgr=y
+CONFIG_PACKAGE_kmod-qca-nss-drv-eogremgr=y
+CONFIG_PACKAGE_kmod-qca-nss-drv-gre=y
+CONFIG_PACKAGE_kmod-qca-nss-drv-igs=y
+CONFIG_PACKAGE_kmod-qca-nss-drv-l2tpv2=y
+CONFIG_PACKAGE_kmod-qca-nss-drv-lag-mgr=y
+CONFIG_PACKAGE_kmod-qca-nss-drv-map-t=y
+CONFIG_PACKAGE_kmod-qca-nss-drv-match=y
+CONFIG_PACKAGE_kmod-qca-nss-drv-mirror=y
+CONFIG_PACKAGE_kmod-qca-nss-drv-netlink=y
+CONFIG_PACKAGE_kmod-qca-nss-drv-pppoe=y
+CONFIG_PACKAGE_kmod-qca-nss-drv-pptp=y
+CONFIG_PACKAGE_kmod-qca-nss-drv-qdisc=y
+CONFIG_PACKAGE_kmod-qca-nss-drv-tun6rd=y
+CONFIG_PACKAGE_kmod-qca-nss-drv-tunipip6=y
+CONFIG_PACKAGE_kmod-qca-nss-drv-vlan-mgr=y
+CONFIG_PACKAGE_kmod-qca-nss-drv-vxlanmgr=y
+CONFIG_PACKAGE_kmod-qca-nss-drv-wifi-meshmgr=y
+CONFIG_PACKAGE_kmod-nss-ifb=y
+CONFIG_PACKAGE_kmod-qca-mcs=y
 
 # NSS firmware flavour: 12.5 R210 pairs with the vendored 12.5 drv/ecm sources.
 CONFIG_NSS_FIRMWARE_VERSION_12_5=y
 
-# drv feature switches required by ECM deps on qualcommax (and crypto).
-CONFIG_NSS_DRV_IPV6_ENABLE=y
-CONFIG_NSS_DRV_VIRT_IF_ENABLE=y
+# drv feature switches. These must cover the qcom,*-enabled properties declared
+# in ipq6018-nss.dtsi, otherwise the firmware is told a feature exists while the
+# matching driver code/front-end was never built.
+CONFIG_NSS_DRV_BRIDGE_ENABLE=y
 CONFIG_NSS_DRV_CRYPTO_ENABLE=y
+CONFIG_NSS_DRV_GRE_ENABLE=y
+CONFIG_NSS_DRV_GRE_REDIR_ENABLE=y
+CONFIG_NSS_DRV_IGS_ENABLE=y
+CONFIG_NSS_DRV_IPV4_REASM_ENABLE=y
+CONFIG_NSS_DRV_IPV6_ENABLE=y
+CONFIG_NSS_DRV_IPV6_REASM_ENABLE=y
+CONFIG_NSS_DRV_L2TP_ENABLE=y
+CONFIG_NSS_DRV_LAG_ENABLE=y
+CONFIG_NSS_DRV_MAPT_ENABLE=y
+CONFIG_NSS_DRV_MATCH_ENABLE=y
+CONFIG_NSS_DRV_MIRROR_ENABLE=y
+CONFIG_NSS_DRV_PPPOE_ENABLE=y
+CONFIG_NSS_DRV_PPTP_ENABLE=y
+CONFIG_NSS_DRV_SHAPER_ENABLE=y
+CONFIG_NSS_DRV_TUN6RD_ENABLE=y
+CONFIG_NSS_DRV_TUNIPIP6_ENABLE=y
+CONFIG_NSS_DRV_VIRT_IF_ENABLE=y
+CONFIG_NSS_DRV_VLAN_ENABLE=y
+CONFIG_NSS_DRV_VXLAN_ENABLE=y
+CONFIG_NSS_DRV_WIFIOFFLOAD_ENABLE=y
+CONFIG_NSS_DRV_WIFI_MESH_ENABLE=y
 
 # Docker macvlan NSS offload: ECM auto-enables ECM_INTERFACE_MACVLAN_ENABLE=y
 # when kmod-macvlan is present (kernel patch 0600-5 already applied).
