@@ -18,10 +18,6 @@ PKG_BUILD_FLAGS:=gc-sections lto
 PKG_CONFIG_DEPENDS:= \
 	CONFIG_NSS_DRV_PPPOE_ENABLE
 
-ifneq ($(CONFIG_PACKAGE_kmod-nat46),)
-PKG_BUILD_DEPENDS+=nat46
-endif
-
 include $(INCLUDE_DIR)/kernel.mk
 include $(INCLUDE_DIR)/package.mk
 
@@ -39,7 +35,6 @@ define KernelPackage/qca-nss-ecm
 		   +PACKAGE_kmod-qca-mcs:kmod-qca-mcs \
 		   +PACKAGE_kmod-bonding:kmod-bonding \
 		   +PACKAGE_kmod-vxlan:kmod-vxlan \
-		   +PACKAGE_kmod-nat46:kmod-nat46 \
 		   +PACKAGE_kmod-ppp:kmod-ppp \
 		   +PACKAGE_kmod-pppoe:kmod-pppoe \
 		   +PACKAGE_kmod-pptp:kmod-pptp \
@@ -72,8 +67,7 @@ endef
 
 EXTRA_CFLAGS+= \
 		 -I$(STAGING_DIR)/usr/include/qca-nss-drv \
-		 -I$(STAGING_DIR)/usr/include/qca-mcs \
-		 -I$(STAGING_DIR)/usr/include/nat46
+		 -I$(STAGING_DIR)/usr/include/qca-mcs
 
 ifneq (, $(findstring $(CONFIG_TARGET_BOARD), "qualcommax" "ipq60xx"))
 ECM_MAKE_OPTS+= ECM_NON_PORTED_SUPPORT_ENABLE=y \
@@ -123,9 +117,7 @@ ifneq ($(CONFIG_PACKAGE_kmod-qca-mcs),)
 ECM_MAKE_OPTS+=ECM_MULTICAST_ENABLE=y
 endif
 
-ifneq ($(CONFIG_PACKAGE_kmod-nat46),)
-ECM_MAKE_OPTS+=ECM_INTERFACE_MAP_T_ENABLE=y
-endif
+ECM_MAKE_OPTS+=ECM_INTERFACE_MAP_T_ENABLE=n
 
 ifneq ($(CONFIG_PACKAGE_kmod-ipsec),)
 ECM_MAKE_OPTS+=ECM_INTERFACE_IPSEC_ENABLE=y
