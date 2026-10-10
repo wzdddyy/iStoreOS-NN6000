@@ -135,6 +135,7 @@ check "nss mirred uapi header"       test -f "$TREE/target/linux/qualcommax/file
 check "qca-nss-dp pinned to 6.12 ref" grep -q '6a5c4716ca258d67202fc7964c9294dfefa3ccfa' "$TREE/package/kernel/qca-nss-dp/Makefile"
 check "qca-ssdk log patch"           test -f "$TREE/package/kernel/qca-ssdk/patches/0012-suppress-noisy-error-log.patch"
 check "nat46 ships headers to staging" grep -q 'usr/include/nat46' "$TREE/package/kernel/nat46/Makefile"
+check "ecm build-depends on nat46"   grep -q 'PKG_BUILD_DEPENDS+=nat46' "$TREE/package/nss/qca-nss-ecm/Makefile"
 check "seed ships nss front-ends"    grep -q 'CONFIG_PACKAGE_kmod-qca-nss-drv-bridge-mgr=y' "$REPO_DIR/config/nn6000.seed"
 check "seed enables bridge feature"  grep -q 'CONFIG_NSS_DRV_BRIDGE_ENABLE=y' "$REPO_DIR/config/nn6000.seed"
 check "seed enables vlan feature"    grep -q 'CONFIG_NSS_DRV_VLAN_ENABLE=y' "$REPO_DIR/config/nn6000.seed"

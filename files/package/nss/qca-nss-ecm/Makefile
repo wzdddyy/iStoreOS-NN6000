@@ -18,6 +18,10 @@ PKG_BUILD_FLAGS:=gc-sections lto
 PKG_CONFIG_DEPENDS:= \
 	CONFIG_NSS_DRV_PPPOE_ENABLE
 
+ifneq ($(CONFIG_PACKAGE_kmod-nat46),)
+PKG_BUILD_DEPENDS+=nat46
+endif
+
 include $(INCLUDE_DIR)/kernel.mk
 include $(INCLUDE_DIR)/package.mk
 
