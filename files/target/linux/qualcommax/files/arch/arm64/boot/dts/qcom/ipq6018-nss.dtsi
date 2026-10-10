@@ -90,7 +90,6 @@
 		qcom,gre-enabled;
 		qcom,gre-redir-enabled;
 		qcom,gre-redir-mark-enabled;
-		qcom,map-t-enabled;
 		qcom,portid-enabled;
 		qcom,ppe-enabled;
 		qcom,pppoe-enabled;
