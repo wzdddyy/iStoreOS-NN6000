@@ -192,23 +192,6 @@ define KernelPackage/qca-nss-drv-pppoe/Description
 Kernel modules for NSS connection manager - Support for PPPoE
 endef
 
-define KernelPackage/qca-nss-drv-map-t
-  SECTION:=kernel
-  CATEGORY:=Kernel modules
-  SUBMENU:=Network Devices
-  TITLE:=NSS connection manager for MAP-T protocol
-  DEPENDS:=@TARGET_qualcommax \
-	   +kmod-qca-nss-drv \
-	   +@NSS_DRV_MAPT_ENABLE \
-	   +kmod-nat46
-  FILES:=$(PKG_BUILD_DIR)/map/map-t/qca-nss-map-t.ko
-  AUTOLOAD:=$(call AutoLoad,51,qca-nss-map-t)
-endef
-
-define KernelPackage/qca-nss-drv-map-t/description
-Kernel modules for NSS connection manager - Support for MAP-T
-endef
-
 define KernelPackage/qca-nss-drv-gre
   SECTION:=kernel
   CATEGORY:=Kernel modules
@@ -443,7 +426,6 @@ define KernelPackage/qca-nss-drv-netlink
 	   +PACKAGE_kmod-qca-nss-drv-igs:kmod-qca-nss-drv-igs \
 	   +PACKAGE_kmod-qca-nss-drv-l2tpv2:kmod-qca-nss-drv-l2tpv2 \
 	   +PACKAGE_kmod-qca-nss-drv-lag-mgr:kmod-qca-nss-drv-lag-mgr \
-	   +PACKAGE_kmod-qca-nss-drv-map-t:kmod-qca-nss-drv-map-t \
 	   +PACKAGE_kmod-qca-nss-drv-match:kmod-qca-nss-drv-match \
 	   +PACKAGE_kmod-qca-nss-drv-mirror:kmod-qca-nss-drv-mirror \
 	   +PACKAGE_kmod-qca-nss-drv-pppoe:kmod-qca-nss-drv-pppoe \
@@ -663,8 +645,7 @@ EXTRA_CFLAGS+= \
 	-I$(STAGING_DIR)/usr/include/qca-nss-cfi \
 	-I$(STAGING_DIR)/usr/include/qca-nss-ecm \
 	-I$(STAGING_DIR)/usr/include/qca-ssdk \
-	-I$(STAGING_DIR)/usr/include/qca-ssdk/fal \
-	-I$(STAGING_DIR)/usr/include/nat46
+	-I$(STAGING_DIR)/usr/include/qca-ssdk/fal
 
 # Build individual packages if selected
 ifneq ($(CONFIG_PACKAGE_kmod-qca-nss-drv-profile),)
@@ -696,10 +677,6 @@ endif
 
 ifneq ($(CONFIG_PACKAGE_kmod-qca-nss-drv-pptp),)
 NSS_CLIENTS_MAKE_OPTS+=pptp=y
-endif
-
-ifneq ($(CONFIG_PACKAGE_kmod-qca-nss-drv-map-t),)
-NSS_CLIENTS_MAKE_OPTS+=map-t=y
 endif
 
 ifneq ($(CONFIG_PACKAGE_kmod-qca-nss-drv-tunipip6),)
@@ -870,7 +847,6 @@ $(eval $(call KernelPackage,qca-nss-drv-dtlsmgr))
 $(eval $(call KernelPackage,qca-nss-drv-l2tpv2))
 $(eval $(call KernelPackage,qca-nss-drv-pptp))
 $(eval $(call KernelPackage,qca-nss-drv-pppoe))
-$(eval $(call KernelPackage,qca-nss-drv-map-t))
 $(eval $(call KernelPackage,qca-nss-drv-tunipip6))
 $(eval $(call KernelPackage,qca-nss-drv-qdisc))
 $(eval $(call KernelPackage,qca-nss-drv-igs))
