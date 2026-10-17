@@ -1,0 +1,34 @@
+#!/bin/sh
+# Apply IPv6 relay config on first boot (hotplug may miss the initial ifup event)
+
+wan_proto=$(uci -q get network.wan.proto)
+
+if [ "$wan_proto" = "dhcp" ]; then
+    uci -q delete network.wan.ipv6
+    uci -q delete network.lan.ipv6
+    uci set network.lan.ip6assign='64'
+    uci set dhcp.wan.master='1'
+    uci set dhcp.wan.ra='relay'
+    uci set dhcp.wan.dhcpv6='relay'
+    uci set dhcp.wan.ndp='relay'
+    uci set dhcp.lan.ra='hybrid'
+    uci set dhcp.lan.dhcpv6='hybrid'
+    uci set dhcp.lan.ndp='hybrid'
+    uci -q delete dhcp.lan.ra_slaac
+else
+    uci -q delete network.wan.ipv6
+    uci -q delete network.lan.ipv6
+    uci set network.lan.ip6assign='60'
+    uci -q delete dhcp.wan.master
+    uci -q delete dhcp.wan.ra
+    uci -q delete dhcp.wan.dhcpv6
+    uci -q delete dhcp.wan.ndp
+    uci set dhcp.lan.ra='server'
+    uci set dhcp.lan.dhcpv6='server'
+    uci -q delete dhcp.lan.ndp
+    uci set dhcp.lan.ra_slaac='1'
+fi
+
+uci commit network
+uci commit dhcp
+/etc/init.d/odhcpd restart

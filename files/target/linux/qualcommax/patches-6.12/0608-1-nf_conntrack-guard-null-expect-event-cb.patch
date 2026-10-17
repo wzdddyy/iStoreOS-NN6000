@@ -1,0 +1,32 @@
+From: wzdddyy <89689685+wzdddyy@users.noreply.github.com>
+Date: Sun, 11 Oct 2026 00:00:00 +0800
+Subject: [PATCH] netfilter: nf_conntrack: guard NULL exp_event callback
+
+nf_ct_expect_event_report() calls notify->exp_event() without checking that
+it is non-NULL, relying on every notifier registrant to populate both
+callbacks. Out-of-tree notifiers (such as the QCA NSS ECM stack) only
+provide .ct_event, so any expect event delivered while such a notifier is
+installed jumps to NULL.
+
+Observed on IPQ6018 (Link NN6000) with the NSS ECM stack: plugging in the
+WAN cable makes tailscaled emit a UDP probe, conntrack raises an expect
+event, and the kernel oopses with "pc : 0x0" inside
+nf_ct_expect_event_report+0x80.
+
+Guard the callback the same way the event path already is.
+
+Signed-off-by: wzdddyy <89689685+wzdddyy@users.noreply.github.com>
+---
+ net/netfilter/nf_conntrack_ecache.c | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+--- a/net/netfilter/nf_conntrack_ecache.c
++++ b/net/netfilter/nf_conntrack_ecache.c
+@@ -254,6 +254,7 @@ void nf_ct_expect_event_report(enum ip_conntrack_expect_events event,
+ 			.portid	= portid,
+ 			.report = report
+ 		};
++		if (notify->exp_event)
+ 		notify->exp_event(1 << event, &item);
+ 	}
+ out_unlock:

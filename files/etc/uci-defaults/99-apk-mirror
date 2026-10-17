@@ -1,0 +1,24 @@
+#!/bin/sh
+# immortalwrt 包源 + openwrt target 源。base 单独放 base.list：首页会 curl distfeeds.list 里 base 行的 .asc，immortalwrt 没有，会一直报"软件源错误"。
+DIR=/etc/apk/repositories.d
+BASE=https://mirrors.nju.edu.cn/immortalwrt/releases/25.12-SNAPSHOT
+OWRT=https://mirror.zju.edu.cn/openwrt/releases/25.12.5
+[ -d "$DIR" ] || exit 0
+
+cat >"$DIR/base.list" <<EOF
+$BASE/packages/aarch64_cortex-a53/base/packages.adb
+EOF
+
+cat >"$DIR/distfeeds.list" <<EOF
+$BASE/packages/aarch64_cortex-a53/luci/packages.adb
+$BASE/packages/aarch64_cortex-a53/packages/packages.adb
+$BASE/packages/aarch64_cortex-a53/routing/packages.adb
+$BASE/packages/aarch64_cortex-a53/telephony/packages.adb
+$OWRT/targets/qualcommax/ipq60xx/packages/packages.adb
+EOF
+
+for f in "$DIR"/*.list; do
+	[ -f "$f" ] || continue
+	sed -i 's|https://downloads\.openwrt\.org|https://mirror.zju.edu.cn/openwrt|g' "$f"
+	sed -i '/\/kmods\//d' "$f"
+done

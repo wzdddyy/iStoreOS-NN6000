@@ -1,0 +1,7 @@
+#!/bin/sh
+# Enable tailscale-settings service so that LuCI-saved settings (advertise-routes,
+# exit-node, etc.) are applied via 'tailscale set' on boot and on UCI changes.
+[ -f /etc/init.d/tailscale-settings ] || exit 0
+chmod +x /etc/init.d/tailscale-settings 2>/dev/null
+/etc/init.d/tailscale-settings enable
+/etc/init.d/tailscale-settings start

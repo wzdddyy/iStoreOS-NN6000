@@ -1,0 +1,47 @@
+--- a/feeds/luci/modules/luci-base/root/usr/share/rpcd/ucode/luci
++++ b/feeds/luci/modules/luci-base/root/usr/share/rpcd/ucode/luci
+@@ -47,6 +47,33 @@
+ }
+ 
+ const methods = {
++	getCPUInfo: {
++		call: function(request) {
++			const fd = popen('/bin/sh /usr/bin/cpuinfo 2>/dev/null');
++			const data = fd ? trim(fd.read('all')) : null;
++			if (fd)
++				fd.close();
++			return { cpuinfo: data || null };
++		}
++	},
++	getTempInfo: {
++		call: function(request) {
++			const fd = popen('/bin/sh /usr/bin/tempinfo 2>/dev/null');
++			const data = fd ? trim(fd.read('all')) : null;
++			if (fd)
++				fd.close();
++			return { tempinfo: data || null };
++		}
++	},
++	getCPUUsage: {
++			call: function(request) {
++				const fd = popen('/bin/sh /usr/bin/cpuusage 2>/dev/null');
++				const data = fd ? trim(fd.read('all')) : null;
++				if (fd)
++					fd.close();
++				return { cpuusage: data || null };
++			}
++		},
+ 	getVersion: {
+ 		call: function(request) {
+ 			return { revision, branch };
+--- a/feeds/luci/modules/luci-mod-status/root/usr/share/rpcd/acl.d/luci-mod-status-index.json
++++ b/feeds/luci/modules/luci-mod-status/root/usr/share/rpcd/acl.d/luci-mod-status-index.json
+@@ -9,7 +9,7 @@
+ 				"/www/luci-static/resources/view/status/include": [ "list" ]
+ 			},
+ 			"ubus": {
+-				"luci": [ "getVersion", "getUnixtime", "getOdhcp6cStats" ],
++				"luci": [ "getVersion", "getUnixtime", "getOdhcp6cStats", "getCPUInfo", "getTempInfo", "getCPUUsage" ],
+ 				"file": [ "list", "read" ],
+ 				"system": [ "board", "info" ]
+ 			}

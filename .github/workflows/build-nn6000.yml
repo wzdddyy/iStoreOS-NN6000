@@ -1,0 +1,178 @@
+name: istoreos-nn6000 build
+
+on:
+  workflow_dispatch:
+    inputs:
+      istoreos_ref:
+        description: "iStoreOS git ref (branch/tag) to build on"
+        required: true
+        default: "istoreos-25.12"
+      publish_release:
+        description: "Publish firmware as a GitHub Release after a successful build"
+        required: true
+        type: boolean
+        default: true
+
+permissions:
+  contents: write
+  actions: write
+
+jobs:
+  build:
+    name: Build NN6000 v2 firmware
+    runs-on: ubuntu-24.04
+    timeout-minutes: 720
+    env:
+      ISTOREOS_BRANCH: ${{ github.event.inputs.istoreos_ref }}
+      CCACHE_DIR: ${{ github.workspace }}/istoreos/.ccache
+      CCACHE_MAXSIZE: 1G
+
+    steps:
+      - name: Checkout port repository
+        uses: actions/checkout@v6.0.2
+
+      - name: Fetch iStoreOS source
+        run: |
+          set -o pipefail
+          REF="${{ github.event.inputs.istoreos_ref }}"
+          echo "Cloning iStoreOS ref: $REF"
+          git clone --depth 1 -b "$REF" https://github.com/istoreos/istoreos.git "$GITHUB_WORKSPACE/istoreos"
+
+      - name: Collect build info
+        id: info
+        working-directory: ${{ github.workspace }}/istoreos
+        run: |
+          echo "commit_hash=$(git rev-parse --short HEAD)" >> "$GITHUB_OUTPUT"
+          echo "commit_date=$(git log -1 --format=%cI)" >> "$GITHUB_OUTPUT"
+          echo "build_date=$(TZ=Asia/Shanghai date '+%Y-%m-%d %H:%M')" >> "$GITHUB_OUTPUT"
+
+      - name: Install build dependencies
+        run: |
+          set -o pipefail
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            build-essential clang flex bison g++ gawk \
+            gcc-multilib g++-multilib gettext git \
+            libncurses-dev libssl-dev python3-setuptools \
+            rsync unzip zlib1g-dev file wget swig \
+            ccache
+          sudo apt-get clean
+
+      - name: Restore toolchain
+        id: toolchain-cache
+        uses: actions/cache/restore@v6.1.0
+        with:
+          path: |
+            istoreos/staging_dir/host
+            istoreos/staging_dir/toolchain-*
+            istoreos/build_dir/toolchain-*
+          key: toolchain-${{ runner.os }}-${{ hashFiles('config/nn6000.seed') }}
+          restore-keys: |
+            toolchain-${{ runner.os }}-
+
+      - name: Apply NN6000 port
+        run: |
+          set -o pipefail
+          if [ -d "$GITHUB_WORKSPACE/istoreos/staging_dir/host/stamp" ]; then
+            find "$GITHUB_WORKSPACE/istoreos/staging_dir" -type d -name stamp -not -path '*target*' -print0 |
+              while IFS= read -r -d '' dir; do
+                find "$dir" -type f -exec touch {} +
+              done
+          fi
+          sh scripts/apply-nn6000.sh "$GITHUB_WORKSPACE/istoreos"
+
+      - name: Update and install feeds
+        working-directory: ${{ github.workspace }}/istoreos
+        run: |
+          set -o pipefail
+          ./scripts/feeds update -a
+          sh "$GITHUB_WORKSPACE/scripts/setup-feeds.sh" "$GITHUB_WORKSPACE/istoreos"
+          ./scripts/feeds update -i
+          ./scripts/feeds install -a
+
+      - name: Configure and verify
+        working-directory: ${{ github.workspace }}/istoreos
+        run: |
+          set -o pipefail
+          cat "$GITHUB_WORKSPACE/config/nn6000.seed" > .config
+          make defconfig
+          sh "$GITHUB_WORKSPACE/scripts/verify-config.sh" "$GITHUB_WORKSPACE/istoreos"
+
+      - name: Pre-download sources
+        working-directory: ${{ github.workspace }}/istoreos
+        run: |
+          set -o pipefail
+          make download -j8 || make download -j1 V=s
+          find dl -size -1024c -type f -exec rm -f {} \; || true
+          make download -j8 || true
+
+      - name: Build firmware
+        working-directory: ${{ github.workspace }}/istoreos
+        run: |
+          set -o pipefail
+          echo "Starting build, parallel jobs: $(nproc)"
+          if ! make -j"$(nproc)" 2>&1 | tee build.log; then
+            echo "::warning::Parallel build failed, retrying single-threaded with V=s"
+            # -k: log every broken package, not just the first one.
+            make -j1 -k V=s 2>&1 | tee -a build.log
+          fi
+          echo "::group::ccache stats"
+          ccache -s || true
+          echo "::endgroup::"
+
+      - name: Verify artifacts
+        working-directory: ${{ github.workspace }}/istoreos
+        run: |
+          set -o pipefail
+          sh "$GITHUB_WORKSPACE/scripts/verify-artifacts.sh" "$GITHUB_WORKSPACE/istoreos"
+
+      - name: Save toolchain
+        if: always() && steps.toolchain-cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v6.1.0
+        with:
+          path: |
+            istoreos/staging_dir/host
+            istoreos/staging_dir/toolchain-*
+            istoreos/build_dir/toolchain-*
+          key: ${{ steps.toolchain-cache.outputs.cache-primary-key }}
+
+      - name: Stage release artifacts with timestamp prefix
+        id: ts
+        if: success() && inputs.publish_release
+        run: |
+          set -o pipefail
+          STAMP="$(TZ=Asia/Shanghai date +%y.%m.%d_%H.%M.%S)"
+          echo "stamp=$STAMP" >> "$GITHUB_OUTPUT"
+          echo "tag=rel-nn6000-${STAMP}" >> "$GITHUB_OUTPUT"
+          echo "human=$(TZ=Asia/Shanghai date '+%Y-%m-%d %H:%M')" >> "$GITHUB_OUTPUT"
+
+          SRC="istoreos/bin/targets/qualcommax/ipq60xx"
+          DST="release-artifacts"
+          mkdir -p "$DST"
+
+          # Both wifi and no-wifi images are produced by a single build pass
+          # (link_nn6000-v2 and link_nn6000-v2-nowifi), so ship them all.
+          for f in "$SRC"/*link_nn6000-v2*.bin "$SRC"/*link_nn6000-v2*.itb "$SRC"/*qualcommax-ipq60xx*.manifest; do
+            [ -f "$f" ] || continue
+            cp "$f" "$DST/${STAMP}-$(basename "$f")"
+          done
+          ls -lh "$DST"
+
+      - name: Publish release
+        if: success() && inputs.publish_release
+        uses: softprops/action-gh-release@v3
+        with:
+          tag_name: ${{ steps.ts.outputs.tag }}
+          name: iStoreOS Link NN6000 v2 Firmware ${{ steps.ts.outputs.human }}
+          files: |
+            release-artifacts/*.bin
+            release-artifacts/*.itb
+            release-artifacts/*.manifest
+          body: |
+            ## iStoreOS Link NN6000 v2 Firmware
+
+            - **目标设备**: Link NN6000 v2
+            - **平台**: qualcommax/ipq60xx (ipq6000)
+            - **iStoreOS 分支**: ${{ env.ISTOREOS_BRANCH }}
+            - **iStoreOS 提交**: ${{ steps.info.outputs.commit_hash }} (${{ steps.info.outputs.commit_date }})
+            - **编译日期**: ${{ steps.info.outputs.build_date }}

@@ -1,0 +1,28 @@
+
+define Device/link_nn6000-v1
+	$(call Device/FitImage)
+	$(call Device/EmmcImage)
+	DEVICE_VENDOR := Link
+	DEVICE_MODEL := NN6000 v1
+	SOC := ipq6000
+	KERNEL_SIZE := 12288k
+	DEVICE_DTS_CONFIG := config@cp03-c1
+	DEVICE_PACKAGES := ipq-wifi-link_nn6000 kmod-ath11k-ahb ath11k-firmware-ipq6018 wpad-basic-mbedtls kmod-fs-f2fs f2fs-tools
+	IMAGE/factory.bin := append-kernel | pad-to $$(KERNEL_SIZE) | append-rootfs | append-metadata
+endef
+TARGET_DEVICES += link_nn6000-v1
+
+define Device/link_nn6000-v2
+	$(Device/link_nn6000-v1)
+	DEVICE_MODEL := NN6000 v2
+endef
+TARGET_DEVICES += link_nn6000-v2
+
+define Device/link_nn6000-v2-nowifi
+	$(Device/link_nn6000-v1)
+	DEVICE_MODEL := NN6000 v2 (No WiFi)
+	DEVICE_DTS := ipq6000-nn6000-v2
+	SUPPORTED_DEVICES := link,nn6000-v2
+	DEVICE_PACKAGES := kmod-fs-f2fs f2fs-tools
+endef
+TARGET_DEVICES += link_nn6000-v2-nowifi

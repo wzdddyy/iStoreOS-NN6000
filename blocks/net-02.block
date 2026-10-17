@@ -1,0 +1,6 @@
+	link,nn6000-v1)
+		ucidef_set_interfaces_lan_wan "lan1 lan2" "wan"
+		;;
+	link,nn6000-v2)
+		ucidef_set_interfaces_lan_wan "lan1 lan2 lan3 lan4" "wan"
+		;;

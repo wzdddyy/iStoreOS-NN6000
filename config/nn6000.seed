@@ -1,0 +1,222 @@
+# Link NN6000 v2 - iStoreOS 25.12 build seed
+# Apply with:  cat config/nn6000.seed > .config && make defconfig
+
+# --- Build acceleration -----------------------------------------------------
+CONFIG_DEVEL=y
+CONFIG_CCACHE=y
+
+# --- Target / devices -------------------------------------------------------
+# Multiple devices in one build pass: select MULTI_PROFILE, then enable each
+# device via the independent TARGET_DEVICE_* symbols under "Target Devices".
+# TARGET_PER_DEVICE_ROOTFS makes every device build its own rootfs.
+CONFIG_TARGET_qualcommax=y
+CONFIG_TARGET_qualcommax_ipq60xx=y
+CONFIG_TARGET_MULTI_PROFILE=y
+CONFIG_TARGET_DEVICE_qualcommax_ipq60xx_DEVICE_link_nn6000-v2=y
+CONFIG_TARGET_DEVICE_qualcommax_ipq60xx_DEVICE_link_nn6000-v2-nowifi=y
+CONFIG_TARGET_PER_DEVICE_ROOTFS=y
+CONFIG_TARGET_ROOTFS_SQUASHFS=y
+CONFIG_TARGET_ROOTFS_INITRAMFS=y
+CONFIG_KERNEL_BUILD_USER="istoreos"
+CONFIG_KERNEL_BUILD_DOMAIN="istoreos"
+
+# --- iStoreOS home page / quickstart stack ---------------------------------
+CONFIG_PACKAGE_luci-app-store=y
+CONFIG_PACKAGE_quickstart=y
+CONFIG_PACKAGE_luci-app-quickstart=y
+CONFIG_PACKAGE_luci-i18n-quickstart-zh-cn=y
+CONFIG_PACKAGE_taskd=y
+CONFIG_PACKAGE_luci-lib-taskd=y
+CONFIG_PACKAGE_luci-lib-xterm=y
+CONFIG_PACKAGE_shadow-utils=y
+CONFIG_PACKAGE_shadow-useradd=y
+CONFIG_PACKAGE_mount-utils=y
+CONFIG_PACKAGE_block-mount=y
+CONFIG_PACKAGE_lsblk=y
+CONFIG_PACKAGE_e2fsprogs=y
+CONFIG_PACKAGE_parted=y
+CONFIG_PACKAGE_fdisk=y
+CONFIG_PACKAGE_smartmontools=y
+CONFIG_PACKAGE_smartd=y
+CONFIG_PACKAGE_smartmontools-drivedb=y
+CONFIG_PACKAGE_mdadm=y
+CONFIG_PACKAGE_ip-full=y
+CONFIG_PACKAGE_bash=y
+
+# --- luci-app-store hard requirement: disable optional tar compression -----
+# CONFIG_PACKAGE_TAR_BZIP2 is not set
+# CONFIG_PACKAGE_TAR_XZ is not set
+# CONFIG_PACKAGE_TAR_ZSTD is not set
+
+# --- Theme ------------------------------------------------------------------
+CONFIG_PACKAGE_luci-theme-argon=y
+CONFIG_PACKAGE_luci-app-argon-config=y
+
+# --- Core LuCI --------------------------------------------------------------
+CONFIG_PACKAGE_luci=y
+CONFIG_PACKAGE_luci-app-firewall=y
+CONFIG_PACKAGE_luci-app-package-manager=y
+CONFIG_PACKAGE_luci-compat=y
+
+# --- Terminal / disk / filesystems ------------------------------------------
+CONFIG_PACKAGE_ttyd=y
+CONFIG_PACKAGE_luci-app-ttyd=y
+CONFIG_PACKAGE_blkid=y
+CONFIG_PACKAGE_kmod-usb-storage=y
+CONFIG_PACKAGE_kmod-usb-storage-uas=y
+CONFIG_PACKAGE_usb-storage-utils=y
+CONFIG_PACKAGE_kmod-usb-net=y
+CONFIG_PACKAGE_kmod-usb-net-rtl8150=y
+CONFIG_PACKAGE_kmod-usb-net-asix=y
+CONFIG_PACKAGE_kmod-usb-net-asix-ax88179=y
+CONFIG_PACKAGE_kmod-usb-net-cdc-ether=y
+CONFIG_PACKAGE_kmod-usb-serial=y
+CONFIG_PACKAGE_kmod-usb-serial-option=y
+CONFIG_PACKAGE_kmod-usb-serial-wwan=y
+CONFIG_PACKAGE_kmod-usb-serial-ch341=y
+CONFIG_PACKAGE_kmod-usb-serial-cp210x=y
+CONFIG_PACKAGE_kmod-usb-serial-ftdi=y
+CONFIG_PACKAGE_kmod-usb-serial-pl2303=y
+CONFIG_PACKAGE_kmod-fs-vfat=y
+CONFIG_PACKAGE_kmod-fs-exfat=y
+CONFIG_PACKAGE_kmod-fs-f2fs=y
+CONFIG_PACKAGE_kmod-fs-ext4=y
+CONFIG_PACKAGE_kmod-fs-ntfs3=y
+CONFIG_PACKAGE_mkf2fs=y
+CONFIG_PACKAGE_f2fsck=y
+CONFIG_PACKAGE_ntfs3-mount=y
+CONFIG_PACKAGE_luci-app-hd-idle=y
+CONFIG_PACKAGE_luci-app-mini-diskmanager=y
+
+# --- NAS sharing ------------------------------------------------------------
+CONFIG_PACKAGE_luci-app-samba4=y
+CONFIG_PACKAGE_wsdd2=y
+
+# --- DNS services ------------------------------------------------------------
+CONFIG_PACKAGE_luci-app-smartdns=y
+CONFIG_PACKAGE_luci-app-adguardhome=y
+CONFIG_PACKAGE_luci-i18n-adguardhome-zh-cn=y
+
+# --- Common services --------------------------------------------------------
+CONFIG_PACKAGE_luci-app-upnp=y
+CONFIG_PACKAGE_luci-app-dockerman=y
+CONFIG_PACKAGE_luci-lib-docker=y
+CONFIG_PACKAGE_docker=y
+CONFIG_PACKAGE_dockerd=y
+CONFIG_PACKAGE_luci-app-filetransfer=y
+CONFIG_PACKAGE_luci-lib-fs=y
+CONFIG_PACKAGE_luci-app-tn-netports=y
+CONFIG_PACKAGE_irqbalance=y
+CONFIG_PACKAGE_luci-app-autoreboot=y
+
+# --- Lucky -----
+CONFIG_PACKAGE_lucky=y
+CONFIG_PACKAGE_luci-app-lucky=y
+
+# --- DNS / DHCP -------------------------------------------------------------
+CONFIG_PACKAGE_dnsmasq=n
+CONFIG_PACKAGE_dnsmasq-full=y
+CONFIG_PACKAGE_dnsmasq_full_conntrack=y
+
+# --- VPN / remote access ----------------------------------------------------
+CONFIG_PACKAGE_kmod-wireguard=y
+CONFIG_PACKAGE_wireguard-tools=y
+CONFIG_PACKAGE_luci-proto-wireguard=y
+CONFIG_PACKAGE_tailscale=y
+CONFIG_PACKAGE_luci-app-tailscale-community=y
+
+# --- QoS / DNS security -----------------------------------------------------
+CONFIG_PACKAGE_luci-app-sqm=y
+CONFIG_PACKAGE_kmod-ipt-nat6=y
+
+# --- Base CLI utilities -----------------------------------------------------
+CONFIG_PACKAGE_curl=y
+CONFIG_PACKAGE_tar=y
+CONFIG_PACKAGE_gzip=y
+CONFIG_PACKAGE_xz-utils=y
+CONFIG_PACKAGE_unzip=y
+CONFIG_PACKAGE_ca-bundle=y
+# target default, kept explicit after the WiFi-stripping rewrite
+CONFIG_PACKAGE_uboot-envtools=y
+
+# --- Network diagnostics ----------------------------------------------------
+CONFIG_PACKAGE_iperf3=y
+CONFIG_PACKAGE_mtr=y
+CONFIG_PACKAGE_tcpdump=y
+CONFIG_PACKAGE_bind-dig=y
+CONFIG_PACKAGE_bind-host=y
+
+# --- Chinese localization ---------------------------------------------------
+CONFIG_LUCI_LANG_zh_Hans=y
+CONFIG_PACKAGE_luci-i18n-base-zh-cn=y
+CONFIG_PACKAGE_luci-i18n-firewall-zh-cn=y
+CONFIG_PACKAGE_luci-i18n-ttyd-zh-cn=y
+CONFIG_PACKAGE_luci-i18n-samba4-zh-cn=y
+CONFIG_PACKAGE_luci-i18n-dockerman-zh-cn=y
+CONFIG_PACKAGE_luci-i18n-upnp-zh-cn=y
+CONFIG_PACKAGE_luci-i18n-argon-config-zh-cn=y
+CONFIG_PACKAGE_luci-i18n-autoreboot-zh-cn=y
+CONFIG_PACKAGE_luci-i18n-mini-diskmanager-zh-cn=y
+CONFIG_PACKAGE_zoneinfo-asia=y
+
+# --- TUN for proxy clients  ----------
+CONFIG_PACKAGE_kmod-tun=y
+
+# --- QCA NSS hardware acceleration ------------------------------------------
+CONFIG_PACKAGE_kmod-qca-nss-dp=y
+CONFIG_PACKAGE_nss-firmware=y
+CONFIG_PACKAGE_nss-eip-firmware=y
+CONFIG_PACKAGE_kmod-qca-nss-drv=y
+CONFIG_PACKAGE_kmod-qca-nss-ecm=y
+CONFIG_PACKAGE_kmod-qca-nss-crypto=y
+
+# qca-nss-clients front-ends
+CONFIG_PACKAGE_kmod-qca-nss-drv-bridge-mgr=y
+CONFIG_PACKAGE_kmod-qca-nss-drv-eogremgr=y
+CONFIG_PACKAGE_kmod-qca-nss-drv-gre=y
+CONFIG_PACKAGE_kmod-qca-nss-drv-igs=y
+CONFIG_PACKAGE_kmod-qca-nss-drv-l2tpv2=y
+CONFIG_PACKAGE_kmod-qca-nss-drv-lag-mgr=y
+CONFIG_PACKAGE_kmod-qca-nss-drv-match=y
+CONFIG_PACKAGE_kmod-qca-nss-drv-mirror=y
+CONFIG_PACKAGE_kmod-qca-nss-drv-netlink=y
+CONFIG_PACKAGE_kmod-qca-nss-drv-pppoe=y
+CONFIG_PACKAGE_kmod-qca-nss-drv-pptp=y
+CONFIG_PACKAGE_kmod-qca-nss-drv-qdisc=y
+CONFIG_PACKAGE_kmod-qca-nss-drv-tun6rd=y
+CONFIG_PACKAGE_kmod-qca-nss-drv-tunipip6=y
+CONFIG_PACKAGE_kmod-qca-nss-drv-vlan-mgr=y
+CONFIG_PACKAGE_kmod-qca-nss-drv-vxlanmgr=y
+CONFIG_PACKAGE_kmod-qca-nss-drv-wifi-meshmgr=y
+CONFIG_PACKAGE_kmod-nss-ifb=y
+CONFIG_PACKAGE_kmod-qca-mcs=y
+
+# NSS firmware flavour: 12.5 R210 pairs with the vendored 12.5 drv/ecm sources.
+CONFIG_NSS_FIRMWARE_VERSION_12_5=y
+
+# drv feature switches. These must cover the qcom,*-enabled properties declared
+CONFIG_NSS_DRV_BRIDGE_ENABLE=y
+CONFIG_NSS_DRV_CRYPTO_ENABLE=y
+CONFIG_NSS_DRV_GRE_ENABLE=y
+CONFIG_NSS_DRV_GRE_REDIR_ENABLE=y
+CONFIG_NSS_DRV_IGS_ENABLE=y
+CONFIG_NSS_DRV_IPV4_REASM_ENABLE=y
+CONFIG_NSS_DRV_IPV6_ENABLE=y
+CONFIG_NSS_DRV_IPV6_REASM_ENABLE=y
+CONFIG_NSS_DRV_L2TP_ENABLE=y
+CONFIG_NSS_DRV_LAG_ENABLE=y
+CONFIG_NSS_DRV_MATCH_ENABLE=y
+CONFIG_NSS_DRV_MIRROR_ENABLE=y
+CONFIG_NSS_DRV_PPPOE_ENABLE=y
+CONFIG_NSS_DRV_PPTP_ENABLE=y
+CONFIG_NSS_DRV_SHAPER_ENABLE=y
+CONFIG_NSS_DRV_TUN6RD_ENABLE=y
+CONFIG_NSS_DRV_TUNIPIP6_ENABLE=y
+CONFIG_NSS_DRV_VIRT_IF_ENABLE=y
+CONFIG_NSS_DRV_VLAN_ENABLE=y
+CONFIG_NSS_DRV_VXLAN_ENABLE=y
+CONFIG_NSS_DRV_WIFIOFFLOAD_ENABLE=y
+CONFIG_NSS_DRV_WIFI_MESH_ENABLE=y
+
+# Docker macvlan NSS offload: ECM auto-enables ECM_INTERFACE_MACVLAN_ENABLE=y
+CONFIG_PACKAGE_kmod-macvlan=y

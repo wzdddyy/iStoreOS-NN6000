@@ -1,0 +1,32 @@
+--- a/feeds/packages/lang/golang/golang-values.mk
++++ b/feeds/packages/lang/golang/golang-values.mk
+@@ -124,7 +124,7 @@
+   GOBOOTSTRAP_TOOLEXEC
+ 
+ 
+-GO_DEFAULT_VERSION:=1.26
++GO_DEFAULT_VERSION:=1.27
+ GO_HOST_VERSION:=$(patsubst golang%/host,%,$(filter golang%/host,$(PKG_BUILD_DEPENDS)))
+ ifeq ($(GO_HOST_VERSION),)
+   GO_HOST_VERSION:=$(GO_DEFAULT_VERSION)
+--- a/feeds/packages/lang/golang/golang-package.mk
++++ b/feeds/packages/lang/golang/golang-package.mk
+@@ -235,6 +235,7 @@
+ 	$(if $(GO_PKG_ENABLE_SPECTRE),-spectre all)
+ 
+ GO_PKG_DEFAULT_LDFLAGS= \
++	-checklinkname=0 \
+ 	-linkmode external \
+ 	-extldflags '$(patsubst -z%,-Wl$(comma)-z$(comma)%,$(TARGET_LDFLAGS))'
+ 
+--- a/feeds/packages/utils/containerd/Makefile
++++ b/feeds/packages/utils/containerd/Makefile
+@@ -62,4 +62,8 @@
+ 	$(INSTALL_BIN) $(PKG_INSTALL_DIR)/bin/{ctr,containerd,containerd-stress,containerd-shim,containerd-shim-runc-v1,containerd-shim-runc-v2} $(1)/usr/bin/
+ endef
+ 
++Hooks/Prepare/Post += containerd-fix
++containerd-fix = $(SED) "s|^GO_LDFLAGS=-ldflags '|GO_LDFLAGS=-ldflags '-checklinkname=0 |" $(PKG_BUILD_DIR)/Makefile
++containerd-fix += && $(SED) "s|^SHIM_GO_LDFLAGS=-ldflags '|SHIM_GO_LDFLAGS=-ldflags '-checklinkname=0 |" $(PKG_BUILD_DIR)/Makefile
++
+ $(eval $(call BuildPackage,containerd))

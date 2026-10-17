@@ -1,0 +1,1 @@
+kmod-ath kmod-ath11k kmod-ath11k-ahb kmod-ath11k-pci kmod-mac80211 kmod-cfg80211 ipq-wifi-link_nn6000 ath11k-firmware-ipq6018 ath11k-firmware-ipq6018-ddwrt ath11k-firmware-qcn9074 ath11k-firmware-qcn9074-ddwrt wpad-basic-mbedtls hostapd-common
