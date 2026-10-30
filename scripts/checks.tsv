@@ -1,0 +1,20 @@
+# mode|desc|file|pattern
+# mode: has=literal exists, not=literal absent, re=extended regex, file=file exists
+# file: relative to the OpenWrt tree; R: prefix means relative to this repo
+
+has|eMMC A/B sysupgrade branch|target/linux/qualcommax/ipq60xx/base-files/lib/upgrade/platform.sh|link,nn6000-v1
+has|bootconfig kernel slot @128|target/linux/qualcommax/ipq60xx/base-files/lib/upgrade/platform.sh|-s 128
+has|bootconfig rootfs slot @148|target/linux/qualcommax/ipq60xx/base-files/lib/upgrade/platform.sh|-s 148
+not|ath11k-ahb remains in target defaults|target/linux/qualcommax/Makefile|kmod-ath11k-ahb
+not|wpad remains in target defaults|target/linux/qualcommax/Makefile|wpad-basic-mbedtls
+not|ath11k-firmware in subtarget defaults|target/linux/qualcommax/ipq60xx/target.mk|ath11k-firmware-ipq6018
+has|qcom default nss-dp recovered|target/linux/qualcommax/Makefile|kmod-qca-nss-dp
+has|qcom default uboot-envtools recovered|target/linux/qualcommax/Makefile|uboot-envtools
+re|firmware build time stamp|files/etc/nn6000-build-time|^[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}$
+file|smartdns source staged to dl/|dl/smartdns-Release48.4.tar.gz|
+file|tailscale source staged to dl/|dl/tailscale-1.104.1.tar.gz|
+has|seed ships nss front-ends|R:config/nn6000.seed|CONFIG_PACKAGE_kmod-qca-nss-drv-bridge-mgr=y
+has|seed enables bridge feature|R:config/nn6000.seed|CONFIG_NSS_DRV_BRIDGE_ENABLE=y
+has|seed enables vlan feature|R:config/nn6000.seed|CONFIG_NSS_DRV_VLAN_ENABLE=y
+has|device seed selects v1 + v1-nowifi|R:config/devices/*.seed|DEVICE_link_nn6000-v1-nowifi=y
+has|device seed selects v2 + v2-nowifi|R:config/devices/*.seed|DEVICE_link_nn6000-v2-nowifi=y

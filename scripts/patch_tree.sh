@@ -175,6 +175,21 @@ P() {
 	if awk -v TAG="$_tag" -v MODE="$_mode" -v INLINE="$_inline" \
 	      -v BLOCK="$BLOCKS/$_blk" -v ANCHFILE="$_ancharg" \
 	      -f "$TMP/prog.awk" "$_path" > "$TMP/out"; then
+		if [ "$_mode" != "delete" ] && [ "$_inline" -eq 0 ]; then
+			awk -v TAG="$_tag" '
+				BEGIN {
+					b = "# >>> NN6000 " TAG " >>>"
+					e = "# <<< NN6000 " TAG " <<<"
+				}
+				$0 == b { ins = 1; next }
+				$0 == e { ins = 0; next }
+				ins
+			' "$TMP/out" > "$TMP/body"
+			if ! cmp -s "$TMP/body" "$BLOCKS/$_blk"; then
+				echo "ERROR: inserted block [$_tag] does not match $_blk" >&2
+				exit 1
+			fi
+		fi
 		cat "$TMP/out" > "$_path"
 	else
 		echo "ERROR: failed patching [$_tag] $_rel" >&2
