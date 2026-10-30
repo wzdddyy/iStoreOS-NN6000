@@ -1,16 +1,25 @@
 	link,nn6000-v1|\
 	link,nn6000-v2)
-		local cfgpart=$(find_mmc_part "0:BOOTCONFIG")
-		part_num="$(hexdump -e '1/1 "%01x|"' -n 1 -s 148 -C $cfgpart | cut -f 1 -d "|" | head -n1)"
-		# 内核 A/B：写入当前活动槽（HLOS / HLOS_1）
-		if [ "$part_num" -eq "1" ]; then
+		local cfgpart part_ker part_root
+		cfgpart=$(find_mmc_part "0:BOOTCONFIG")
+		part_ker="$(hexdump -e '1/1 "%01x|"' -n 1 -s 128 -C "$cfgpart" | cut -f 1 -d "|" | head -n1)"
+		part_root="$(hexdump -e '1/1 "%01x|"' -n 1 -s 148 -C "$cfgpart" | cut -f 1 -d "|" | head -n1)"
+		case "$part_ker:$part_root" in
+			0:0|1:1)
+				;;
+			*)
+				echo "ERROR: BOOTCONFIG slot mismatch (0:HLOS=$part_ker, rootfs=$part_root)" >&2
+				echo "       refuse to flash: kernel and rootfs would land on different slots" >&2
+				return 1
+				;;
+		esac
+		if [ "$part_ker" -eq "1" ]; then
 			CI_KERNPART="0:HLOS_1"
 		else
 			CI_KERNPART="0:HLOS"
 		fi
-		# rootfs：自适应单/双 rootfs。
 		if find_mmc_part "rootfs_1" >/dev/null 2>&1; then
-			if [ "$part_num" -eq "1" ]; then
+			if [ "$part_root" -eq "1" ]; then
 				CI_ROOTPART="rootfs_1"
 			else
 				CI_ROOTPART="rootfs"
