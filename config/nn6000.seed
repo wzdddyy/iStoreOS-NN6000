@@ -164,6 +164,19 @@ CONFIG_PACKAGE_kmod-nft-tproxy=y
 CONFIG_PACKAGE_kmod-dummy=y
 CONFIG_PACKAGE_kmod-netlink-diag=y
 
+# --- eBPF / BTF for dae/daed CO-RE dataplane --------------------------------
+CONFIG_PACKAGE_kmod-sched-core=y
+CONFIG_PACKAGE_kmod-sched-bpf=y
+CONFIG_PACKAGE_kmod-xdp-sockets-diag=y
+CONFIG_PACKAGE_kmod-veth=y
+CONFIG_KERNEL_KALLSYMS=y
+CONFIG_KERNEL_XDP_SOCKETS=y
+CONFIG_KERNEL_DEBUG_INFO=y
+# CONFIG_KERNEL_DEBUG_INFO_REDUCED is not set
+CONFIG_KERNEL_DEBUG_INFO_BTF=y
+CONFIG_KERNEL_KPROBES=y
+CONFIG_KERNEL_BPF_EVENTS=y
+
 # --- Network performance ----------------------------------------------------
 CONFIG_PACKAGE_kmod-tcp-bbr=y
 
