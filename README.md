@@ -37,6 +37,7 @@
 * **hd-idle**：luci-app-hd-idle，硬盘休眠；
 * **samba4**：luci-app-samba4，网络共享；
 * **tailscale**：luci-app-tailscale，VPN异地组网；
+* 内核侧已经具备 dae/daed 运行所需的 eBPF/BTF 条件；
 
 
 ## 目录结构
