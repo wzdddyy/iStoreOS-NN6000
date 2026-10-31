@@ -65,4 +65,20 @@ if [ -n "$MISSING" ]; then
 	FAIL=1
 fi
 
+HARD_KERNEL=$(sed -n 's/^\(CONFIG_KERNEL_[^=]*\)=y$/\1/p' \
+	"$REPO_DIR/config/nn6000.seed")
+MISSING_KERNEL=""
+for k in $HARD_KERNEL; do
+	if grep -q "^${k}=y" .config; then
+		echo "  ok      $k"
+	else
+		echo "  MISSING $k"
+		MISSING_KERNEL="$MISSING_KERNEL $k"
+	fi
+done
+if [ -n "$MISSING_KERNEL" ]; then
+	echo "::error::Required kernel symbols were dropped by defconfig:$MISSING_KERNEL"
+	FAIL=1
+fi
+
 exit $FAIL
