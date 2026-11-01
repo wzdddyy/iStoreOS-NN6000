@@ -28,3 +28,15 @@ mv package/lang/golang/golang1.27 feeds/packages/lang/golang/
 for p in "$REPO_DIR"/patches/*.patch; do
 	patch -p1 -i "$p"
 done
+
+
+LUCI_ZH_PO=feeds/luci/modules/luci-base/po/zh_Hans/base.po
+if [ -f "$LUCI_ZH_PO" ]; then
+	for _pair in 'About|关于' 'Temperature|温度' 'Donation QR Code|赞赏码'; do
+		_msgid=${_pair%%|*}
+		_msgstr=${_pair#*|}
+		if ! grep -qxF "msgid \"$_msgid\"" "$LUCI_ZH_PO"; then
+			printf '\nmsgid "%s"\nmsgstr "%s"\n' "$_msgid" "$_msgstr" >> "$LUCI_ZH_PO"
+		fi
+	done
+fi
