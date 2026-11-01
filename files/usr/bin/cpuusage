@@ -46,12 +46,21 @@ fi
 # 获取 NSS 硬件加速器利用率
 nss_load="$(awk 'NR == 6 { print $2; exit }' /sys/kernel/debug/qca-nss-drv/stats/cpu_load_ubi 2>/dev/null)"
 
-# 获取 ECM 连接数
-ecm_count="$(cat /sys/kernel/debug/ecm/ecm_db/connection_count_simple 2>/dev/null)"
+# 获取 ECM 加速会话数
+ecm_sessions="$(cat /sys/kernel/debug/ecm/ecm_db/connection_count_simple 2>/dev/null | awk '
+{
+    for (i = 1; i < NF; i += 2) {
+        if ($i == "tcp")        tcp = $(i + 1)
+        else if ($i == "udp")   udp = $(i + 1)
+        else if ($i == "other") other = $(i + 1)
+        else if ($i == "total") total = $(i + 1)
+    }
+    if (total != "") printf "%s (TCP %s / UDP %s / Other %s)", total, tcp, udp, other
+}')"
 
 # 构建输出字符串
-output="CPU: ${cpu_usage}%"
-[ -n "$nss_load" ] && output="$output NSS: ${nss_load}"
-[ -n "$ecm_count" ] && output="$output ECM: ${ecm_count}"
+output="CPU ${cpu_usage}%"
+[ -n "$nss_load" ] && output="$output · NSS Load ${nss_load}"
+[ -n "$ecm_sessions" ] && output="$output · ECM Sessions ${ecm_sessions}"
 
 printf "%s" "$output"
