@@ -2,15 +2,6 @@
 'require baseclass';
 'require rpc';
 'require uci';
-/*
- * NN6000 port: extends the stock iStoreOS overview with CPU temperature,
- * CPU usage and a CPU model/frequency enhanced "Architecture" row, backed
- * by the getCPUInfo/getCPUUsage/getTempInfo rpcd methods injected by
- * patches/0002-luci-cpuinfo.patch.
- *
- * It also appends a static "About" row (source / bug report / donate links).
- * That one is plain frontend markup: no script, no rpcd method, no ACL needed.
- */
 var ABOUT_REPO_URL = 'https://github.com/wzdddyy/iStoreOS-NN6000';
 var ABOUT_DONATE_IMG = 'Author.png';	
 
@@ -26,7 +17,7 @@ function showDonate(ev) {
 
 	var img = E('img', {
 		src: L.resource(ABOUT_DONATE_IMG),
-		alt: _('赞赏码'),
+		alt: _('Donation QR Code'),
 		style: 'width:260px;height:auto;background:#fff;border-radius:50%;padding:10px;box-shadow:0 10px 40px rgba(0,0,0,.55)'
 	});
 	img.addEventListener('click', function(e) { e.stopPropagation(); }, false);
@@ -40,8 +31,9 @@ function showDonate(ev) {
 	document.body.appendChild(pop);
 }
 
-function aboutLinks() {
-	var style = 'display:inline-block;margin:2px 24px 2px 0;cursor:pointer;color:#2e7d32';
+function aboutLinks(buildstamp) {
+	var style = 'display:inline-block;cursor:pointer;color:#2e7d32';
+	var sepStyle = 'display:inline-block;margin:0 10px;color:#999';
 
 	function link(url, text, handler) {
 		var a = E('a', { style: style }, [ text ]);
@@ -54,11 +46,24 @@ function aboutLinks() {
 		return a;
 	}
 
-	return [
+	function sep() {
+		return E('span', { style: sepStyle }, [ '·' ]);
+	}
+
+	var items = [
 		link(ABOUT_REPO_URL, 'Firmware Source'),
+		sep(),
 		link(ABOUT_REPO_URL + '/issues', 'Bug Report'),
+		sep(),
 		link(null, 'Support Author', showDonate)
 	];
+
+	if (buildstamp) {
+		items.push(sep());
+		items.push(E('span', { style: 'display:inline-block;color:#666' }, [ 'Build: ' + buildstamp ]));
+	}
+
+	return items;
 }
 
 var callGetUnixtime = rpc.declare({
@@ -119,10 +124,7 @@ return baseclass.extend({
 		    tempinfo    = data[6],
 		    buildtime   = data[7].buildtime;
 		luciversion = luciversion.branch + ' ' + luciversion.revision;
-		// 2026-10-26 19:27 -> 2026.10.26_19.27, same as the release file prefix
-		var buildstamp = buildtime
-			? buildtime.replace(/^(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2})$/, '$1.$2.$3_$4.$5')
-			: null;
+		var buildstamp = buildtime || null;
 		var datestr = null;
 		if (unixtime) {
 			var date = new Date(unixtime * 1000),
@@ -141,7 +143,7 @@ return baseclass.extend({
 			_('Model'),            boardinfo.model,
 			_('Architecture'),     cpuinfo.cpuinfo || boardinfo.system,
 			_('Target Platform'),  (L.isObject(boardinfo.release) ? boardinfo.release.target : ''),
-			_('Firmware Version'), (L.isObject(boardinfo.release) ? boardinfo.release.description + (buildstamp ? '(' + buildstamp + ')' : '') + ' / ' : '') + (luciversion || '') + ' / build by TheJoker',
+			_('Firmware Version'), (L.isObject(boardinfo.release) ? boardinfo.release.description + ' / ' : '') + (luciversion || '') + ' / build by TheJoker',
 			_('Kernel Version'),   boardinfo.kernel,
 			_('Local Time'),       datestr,
 			_('Uptime'),           systeminfo.uptime ? '%t'.format(systeminfo.uptime) : null,
@@ -150,11 +152,11 @@ return baseclass.extend({
 				systeminfo.load[1] / 65535.0,
 				systeminfo.load[2] / 65535.0
 			) : null,
-			_('CPU 使用率 (%)'),    cpuusage.cpuusage,
-			_('关于'),              aboutLinks()
+			_('CPU usage (%)'),    cpuusage.cpuusage,
+			_('About'),            aboutLinks(buildstamp)
 		];
 		if (tempinfo.tempinfo) {
-			fields.splice(6, 0, _('温度'));
+			fields.splice(6, 0, _('Temperature'));
 			fields.splice(7, 0, tempinfo.tempinfo);
 		}
 		var table = E('table', { 'class': 'table' });
