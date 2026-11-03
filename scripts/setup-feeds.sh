@@ -40,3 +40,8 @@ if [ -f "$LUCI_ZH_PO" ]; then
 		fi
 	done
 fi
+
+UPNP_ZH_PO=feeds/luci/applications/luci-app-upnp/po/zh_Hans/upnp.po
+if [ -f "$UPNP_ZH_PO" ]; then
+	sed -i '/^msgid "UPnP IGD & PCP"$/,/^msgstr /s/^msgstr .*/msgstr "端口映射"/' "$UPNP_ZH_PO"
+fi
