@@ -3,8 +3,7 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=lucky
-PKG_VERSION:=2.27.2
-PKG_RELEASE:=3
+PKG_RELEASE:=1
 
 PKG_LICENSE:=MIT
 PKG_LICENSE_FILES:=LICENSE
@@ -48,6 +47,12 @@ ifeq ($(ARCH),mipsel)
   endif
 endif
 
+LUCKY_TARBALL:=$(firstword $(wildcard $(CURDIR)/lucky_*_Linux_$(LUCKY_ARCH)_wanji.tar.gz))
+PKG_VERSION:=$(word 2,$(subst _, ,$(notdir $(LUCKY_TARBALL))))
+ifeq ($(PKG_VERSION),)
+$(error No lucky_*_Linux_$(LUCKY_ARCH)_wanji.tar.gz found in $(CURDIR))
+endif
+
 PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)-$(PKG_VERSION)
 
 include $(INCLUDE_DIR)/package.mk
@@ -75,7 +80,7 @@ endef
 # succeeding (that previously made `make` fail in ~1s on flaky networks).
 define Build/Prepare
 	mkdir -p $(PKG_BUILD_DIR)
-	gzip -dc $(CURDIR)/lucky_$(PKG_VERSION)_Linux_$(LUCKY_ARCH)_wanji.tar.gz \
+	gzip -dc $(LUCKY_TARBALL) \
 		| $(HOST_TAR) -C $(PKG_BUILD_DIR) -xf -
 	$(Build/Patch)
 endef
