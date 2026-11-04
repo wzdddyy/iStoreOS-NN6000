@@ -60,9 +60,6 @@ chmod 0755 "$TREE/files/usr/bin/cpuinfo" \
            "$TREE/files/etc/uci-defaults/"* \
            "$TREE/package/luci/luci-app-mini-diskmanager/root/etc/uci-defaults/setup_prm.sh" \
            "$TREE/package/luci/luci-app-mini-diskmanager/root/usr/libexec/rpcd/minidiskmanager" \
-           "$TREE/package/luci/luci-app-adguardhome/root/etc/init.d/AdGuardHome" \
-           "$TREE/package/luci/luci-app-adguardhome/root/etc/uci-defaults/40_luci-AdGuardHome" \
-           "$TREE/package/luci/luci-app-adguardhome/root/usr/share/AdGuardHome/"*.sh \
            "$TREE/package/luci/luci-app-tailscale-community/root/etc/init.d/tailscale-settings" \
            "$TREE/package/luci/luci-app-tailscale-community/root/etc/uci-defaults/99-tailscale-settings" \
            "$TREE/package/luci/luci-app-dockerman/root/etc/init.d/dockerman" \
