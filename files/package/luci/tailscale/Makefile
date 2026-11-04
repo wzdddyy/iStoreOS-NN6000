@@ -5,19 +5,19 @@
 # See /LICENSE for more information.
 #
 # Vendored from the iStoreOS packages feed (net/tailscale), version bumped
-# 1.98.3 -> 1.104.1. Living outside the feed tree means golang-package.mk is
+# 1.98.3 -> 1.104.5. Living outside the feed tree means golang-package.mk is
 # referenced through $(TOPDIR), and golang1.27/host is pinned explicitly so the
-# build uses the vendored 1.27.2 toolchain.
+# build uses the vendored 1.27.3 toolchain.
 
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=tailscale
-PKG_VERSION:=1.104.1
+PKG_VERSION:=1.104.5
 PKG_RELEASE:=1
 
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.gz
 PKG_SOURCE_URL:=https://codeload.github.com/tailscale/tailscale/tar.gz/v$(PKG_VERSION)?
-PKG_HASH:=bf868b2b1a46b9485d55bcda12c2d7573279ce4474bc6d607f42f1495db36ed8
+PKG_HASH:=0704fa4ce8624463ce421f45f0d20ae8d710b9ee7354eaa1f4a772e9a3cd4ded
 
 PKG_MAINTAINER:=Zephyr Lykos <self@mochaa.ws>, \
 		Sandro Jäckel <sandro.jaeckel@gmail.com>
