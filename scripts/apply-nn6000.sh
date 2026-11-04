@@ -62,6 +62,7 @@ chmod 0755 "$TREE/files/usr/bin/cpuinfo" \
            "$TREE/package/luci/luci-app-mini-diskmanager/root/usr/libexec/rpcd/minidiskmanager" \
            "$TREE/package/luci/luci-app-tailscale-community/root/etc/init.d/tailscale-settings" \
            "$TREE/package/luci/luci-app-tailscale-community/root/etc/uci-defaults/99-tailscale-settings" \
+           "$TREE/package/luci/luci-app-tailscale-community/root/usr/libexec/tailscale-setup-firewall" \
            "$TREE/package/luci/luci-app-dockerman/root/etc/init.d/dockerman" \
            "$TREE/package/luci/luci-app-autoreboot/root/etc/init.d/autoreboot" 2>/dev/null || true
 
