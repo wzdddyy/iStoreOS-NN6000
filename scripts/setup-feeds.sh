@@ -32,9 +32,6 @@ GIT_TERMINAL_PROMPT=0 git clone --depth 1 \
 rm -rf package/luci/luci-app-adguardhome/.git \
 	package/luci/luci-app-adguardhome/.github \
 	package/luci/luci-app-adguardhome/assets
-chmod 0755 package/luci/luci-app-adguardhome/root/etc/init.d/AdGuardHome \
-	package/luci/luci-app-adguardhome/root/etc/uci-defaults/40_luci-AdGuardHome \
-	package/luci/luci-app-adguardhome/root/usr/share/AdGuardHome/*.sh
 
 rm -rf package/ghboost
 GIT_TERMINAL_PROMPT=0 git clone --depth 1 \
