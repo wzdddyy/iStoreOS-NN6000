@@ -31,6 +31,7 @@
 * **ttyd**：luci-app-ttyd，网页终端；
 * **AdGuardHome**：luci-app-adguardhome，广告过滤 DNS 服务器；
 * **lucky**：luci-app-lucky，端口转发 + 反向代理 + DDNS + Web服务 + 网络唤醒；
+* **ghboost**：GitHub 访问优化（DoH 防污染解析 + 透明重定向 + 实测选路）；
 * **mini-diskmanager**：luci-app-mini-diskmanager，磁盘管理工具；
 * **smartdns**：luci-app-smartdns，本地 DNS 服务器，支持分组、分流、缓存与多上游并发查询；
 * **upnp**：luci-app-upnp，UPnP IGD 和 PCP/NAT-PMP 服务；
