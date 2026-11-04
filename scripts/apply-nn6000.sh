@@ -46,6 +46,8 @@ find "$REPO_DIR/files" -type f | while IFS= read -r _abs; do
 done
 echo "  ok    overlay files match repo"
 
+find "$TREE/files" -type d -exec chmod 0755 {} +
+
 chmod 0755 "$TREE/package/luci/quickstart/files/"*.init \
            "$TREE/package/luci/quickstart/files/"*.hotplug \
            "$TREE/package/luci/quickstart/files/"*.uci-default \
