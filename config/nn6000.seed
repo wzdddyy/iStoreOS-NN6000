@@ -104,6 +104,8 @@ CONFIG_PACKAGE_luci-lib-fs=y
 CONFIG_PACKAGE_luci-app-tn-netports=y
 CONFIG_PACKAGE_irqbalance=y
 CONFIG_PACKAGE_luci-app-autoreboot=y
+CONFIG_PACKAGE_ghboost=y
+CONFIG_PACKAGE_luci-app-ghboost=y
 
 # --- Lucky -----
 CONFIG_PACKAGE_lucky=y
