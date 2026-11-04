@@ -25,6 +25,17 @@ rm -rf feeds/packages/net/tailscale feeds/packages/lang/golang/golang1.26
 rm -rf feeds/packages/lang/golang/golang1.27
 mv package/lang/golang/golang1.27 feeds/packages/lang/golang/
 
+rm -rf package/luci/luci-app-adguardhome
+GIT_TERMINAL_PROMPT=0 git clone --depth 1 \
+	https://github.com/wzdddyy/luci-app-adguardhome.git \
+	package/luci/luci-app-adguardhome
+rm -rf package/luci/luci-app-adguardhome/.git \
+	package/luci/luci-app-adguardhome/.github \
+	package/luci/luci-app-adguardhome/assets
+chmod 0755 package/luci/luci-app-adguardhome/root/etc/init.d/AdGuardHome \
+	package/luci/luci-app-adguardhome/root/etc/uci-defaults/40_luci-AdGuardHome \
+	package/luci/luci-app-adguardhome/root/usr/share/AdGuardHome/*.sh
+
 for p in "$REPO_DIR"/patches/*.patch; do
 	patch -p1 -i "$p"
 done
