@@ -6,6 +6,7 @@
 'require ui';
 'require fs';
 'require request';
+'require session';
 
 var HELPER = '/usr/libexec/lucky-call';
 // Keep the fast status request out of the slow binary-query RPC batch.
@@ -42,6 +43,35 @@ var state = {
 function supportsLocalControl(version) {
 	var parts = /^v?(\d+)\.(\d+)\.(\d+)$/.exec(version || '');
 	return !!parts && (+parts[1] > 3 || (+parts[1] === 3 && +parts[2] >= 4));
+}
+
+function refreshCachedMenu() {
+	// A direct visit after SSH installation may still use the pre-install menu
+	// stored in this browser tab. Invalidate only that menu, then reload once.
+	// Lua-only LuCI has no such cache and must not depend on this API.
+	if (typeof session === 'undefined' || !session.getLocalData || !session.setLocalData || !ui.menu || !ui.menu.flushCache)
+		return false;
+	try {
+		var cached = session.getLocalData('menu');
+		if (!cached || typeof cached !== 'object') return false;
+		var admin = cached.children && cached.children.admin;
+		var services = admin && admin.children && admin.children.services;
+		var lucky = services && services.children && services.children.lucky;
+		if (lucky && lucky.title && lucky.satisfied !== false) {
+			session.setLocalData('luckyMenuRefresh', null);
+			return false;
+		}
+		// An ACL or dependency problem can also hide the freshly fetched menu.
+		// Do not keep reloading if invalidating its cache did not resolve that.
+		if (session.getLocalData('luckyMenuRefresh') || !session.setLocalData('luckyMenuRefresh', true))
+			return false;
+		ui.menu.flushCache();
+		// A browser rejecting storage writes must not enter a reload loop.
+		if (session.getLocalData('menu') != null) return false;
+		window.location.reload();
+		return true;
+	}
+	catch (e) { return false; }
 }
 
 function helper(args, program) {
@@ -368,13 +398,16 @@ function updateDashboard(updateInputs) {
 		refresh.disabled = refreshInProgress || resetInProgress;
 		refresh.textContent = refreshInProgress ? _('Refreshing…') : _('Refresh');
 	}
-	updateText('lucky-install', state.error ? _('Load error: %s').format(state.error) : (state.installed ? _('Installed') : (state.loading ? _('Collecting data…') : _('Not installed'))), state.error ? 'error' : (state.installed ? 'success' : ''));
 	var health = { ready: _('Executable'), missing: _('Core missing'), permissions: _('Execution permission missing'), unsafe: _('Unsafe core path'), unknown: _('Unable to inspect core.') };
+	var loadError = state.error ? _('Load error: %s').format(state.error) : '';
+	var installation = state.core === 'ready' ? _('Installed') : health[state.core];
+	if (state.core === 'unknown')
+		installation = loadError || (state.loading ? _('Collecting data…') : health.unknown);
+	updateText('lucky-install', installation, state.core === 'ready' ? 'success' : (state.core === 'unknown' && state.loading && !loadError ? '' : 'error'));
+	updateText('lucky-query-error', state.core === 'unknown' ? '' : loadError);
 	updateText('lucky-core-health', health[state.core] || health.unknown);
 	setDisabled('lucky-core-fix', state.core !== 'permissions' || refreshInProgress || backupInProgress || resetInProgress);
 	setDisabled('lucky-core-upload', coreQueryInProgress || backupInProgress || resetInProgress);
-	if (state.core === 'missing' || state.core === 'permissions' || state.core === 'unsafe')
-		updateText('lucky-install', health[state.core], 'error');
 	updateText('lucky-arch', state.arch);
 	updateText('lucky-version', !state.infoReady && state.loading ? _('Collecting data…') : state.version);
 	updateText('lucky-date', !state.infoReady && state.loading ? _('Collecting data…') : state.date);
@@ -908,6 +941,7 @@ function renderPage(formNode) {
 				textRow(_('Package architecture'), 'lucky-arch'),
 				textRow(_('Build date'), 'lucky-date')
 			]),
+			E('p', { 'class': 'lucky-hint lucky-state-warning', 'id': 'lucky-query-error', 'role': 'status' }),
 			E('div', { 'class': 'lucky-actions lucky-service-actions' }, [
 				serviceButton(_('Start'), 'cbi-button-apply', 'start'),
 				serviceButton(_('Restart'), '', 'restart'),
@@ -1072,6 +1106,8 @@ return view.extend({
 		return E([]);
 	},
 	render: function() {
+		if (refreshCachedMenu())
+			return E('p', { 'class': 'spinning' }, _('Refreshing…'));
 		var map = new form.Map('lucky');
 		// Native LuCI saves the directory through UCI. Lua-only LuCI performs
 		// the same invalidation in its config endpoint instead.
