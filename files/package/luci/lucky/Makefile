@@ -47,10 +47,16 @@ ifeq ($(ARCH),mipsel)
   endif
 endif
 
-LUCKY_TARBALL:=$(firstword $(wildcard $(CURDIR)/lucky_*_Linux_$(LUCKY_ARCH)_wanji.tar.gz))
+# Prefer the tarball matching the target arch but fall back to any bundled one:
+# the metadata scan run by `make defconfig` happens before kconfig writes
+# CONFIG_ARCH, so ARCH is empty there and an arch-only wildcard would abort the
+# scan and silently drop the package from .config.
+LUCKY_TARBALLS:=$(wildcard $(CURDIR)/lucky_*_Linux_*_wanji.tar.gz)
+LUCKY_ARCH_TARBALL:=$(firstword $(wildcard $(CURDIR)/lucky_*_Linux_$(LUCKY_ARCH)_wanji.tar.gz))
+LUCKY_TARBALL:=$(if $(LUCKY_ARCH_TARBALL),$(LUCKY_ARCH_TARBALL),$(firstword $(LUCKY_TARBALLS)))
 PKG_VERSION:=$(word 2,$(subst _, ,$(notdir $(LUCKY_TARBALL))))
 ifeq ($(PKG_VERSION),)
-$(error No lucky_*_Linux_$(LUCKY_ARCH)_wanji.tar.gz found in $(CURDIR))
+$(error No lucky_*_wanji.tar.gz found in $(CURDIR))
 endif
 
 PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)-$(PKG_VERSION)
@@ -79,6 +85,9 @@ endef
 # PKG_SOURCE_URL, so the build never depends on a GitHub release download
 # succeeding (that previously made `make` fail in ~1s on flaky networks).
 define Build/Prepare
+	@[ -n "$(LUCKY_ARCH_TARBALL)" ] || { \
+		echo "ERROR: no lucky tarball for ARCH=$(ARCH) (LUCKY_ARCH=$(LUCKY_ARCH)) in $(CURDIR)" >&2; \
+		exit 1; }
 	mkdir -p $(PKG_BUILD_DIR)
 	gzip -dc $(LUCKY_TARBALL) \
 		| $(HOST_TAR) -C $(PKG_BUILD_DIR) -xf -
