@@ -47,10 +47,6 @@ ifeq ($(ARCH),mipsel)
   endif
 endif
 
-# Prefer the tarball matching the target arch but fall back to any bundled one:
-# the metadata scan run by `make defconfig` happens before kconfig writes
-# CONFIG_ARCH, so ARCH is empty there and an arch-only wildcard would abort the
-# scan and silently drop the package from .config.
 LUCKY_TARBALLS:=$(wildcard $(CURDIR)/lucky_*_Linux_*_wanji.tar.gz)
 LUCKY_ARCH_TARBALL:=$(firstword $(wildcard $(CURDIR)/lucky_*_Linux_$(LUCKY_ARCH)_wanji.tar.gz))
 LUCKY_TARBALL:=$(if $(LUCKY_ARCH_TARBALL),$(LUCKY_ARCH_TARBALL),$(firstword $(LUCKY_TARBALLS)))
