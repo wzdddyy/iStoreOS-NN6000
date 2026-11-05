@@ -20,7 +20,7 @@ rm -rf feeds/luci/applications/luci-app-dockerman \
 	feeds/luci/applications/luci-app-samba4 \
 	feeds/luci/applications/luci-app-smartdns \
 	feeds/luci/applications/luci-app-adguardhome
-rm -rf feeds/packages/net/tailscale feeds/packages/lang/golang/golang1.26
+rm -rf feeds/packages/net/smartdns feeds/packages/net/tailscale feeds/packages/lang/golang/golang1.26
 
 rm -rf feeds/packages/lang/golang/golang1.27
 mv package/lang/golang/golang1.27 feeds/packages/lang/golang/
