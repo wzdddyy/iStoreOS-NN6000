@@ -212,7 +212,7 @@ msgstr "退出时要发送给命令的信号 (默认：1, SIGHUP)"
 #: applications/luci-app-ttyd/root/usr/share/luci/menu.d/luci-app-ttyd.json:3
 #: applications/luci-app-ttyd/root/usr/share/luci/menu.d/luci-app-ttyd.json:14
 msgid "Terminal"
-msgstr "终端"
+msgstr "网页终端"
 
 #: applications/luci-app-ttyd/htdocs/luci-static/resources/view/ttyd/config.js:56
 msgid "Terminal type"
