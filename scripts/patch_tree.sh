@@ -227,11 +227,6 @@ P "package/kernel/linux/modules/netfilter.mk" \
 P "target/linux/qualcommax/config-6.12" \
   "nss-kconfig" "append" "-" "kconfig.block" 0
 
-# --- Move WiFi stack out of target defaults into per-device DEVICE_PACKAGES --
-# qualcommax target defaults carry kmod-ath11k-ahb and wpad-basic-mbedtls; the
-# ipq60xx subtarget carries ath11k-firmware-ipq6018. With PER_DEVICE_ROOTFS
-# these go into every rootfs, so a "-nowifi" device profile cannot drop them.
-# Strip them here and re-add the non-wifi defaults that shared their lines.
 P "target/linux/qualcommax/Makefile" \
   "wifi-defaults-strip" "delete" "-" "qcom-defaults.block" 1
 P "target/linux/qualcommax/Makefile" \
