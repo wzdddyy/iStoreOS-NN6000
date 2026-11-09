@@ -33,7 +33,10 @@ for entry in "$REPO_DIR/files"/*; do
 	esac
 done
 
-find "$REPO_DIR/files" -type f | while IFS= read -r _abs; do
+TMP_LIST=$(mktemp)
+trap 'rm -f "$TMP_LIST"' EXIT
+find "$REPO_DIR/files" -type f > "$TMP_LIST"
+while IFS= read -r _abs; do
 	_rel=${_abs#"$REPO_DIR/files/"}
 	case "$_rel" in
 		etc/*|usr/*|www/*) _dst="$TREE/files/$_rel" ;;
@@ -43,30 +46,21 @@ find "$REPO_DIR/files" -type f | while IFS= read -r _abs; do
 		echo "  FAIL  overlay copy differs: $_rel" >&2
 		exit 1
 	fi
-done
+done < "$TMP_LIST"
 echo "  ok    overlay files match repo"
 
 find "$TREE/files" -type d -exec chmod 0755 {} +
 
-chmod 0755 "$TREE/package/luci/quickstart/files/"*.init \
-           "$TREE/package/luci/quickstart/files/"*.hotplug \
-           "$TREE/package/luci/quickstart/files/"*.uci-default \
-           "$TREE/package/luci/quickstart/files/dhcpvalid.sh" \
-           "$TREE/package/luci/luci-app-quickstart/root/etc/uci-defaults/50_luci-quickstart" \
-           "$TREE/package/luci/luci-app-quickstart/root/usr/libexec/quickstart/auto_setup.sh" 2>/dev/null || true
-
-chmod 0755 "$TREE/files/usr/bin/cpuinfo" \
-           "$TREE/files/usr/bin/tempinfo" \
-           "$TREE/files/usr/bin/cpuusage" \
-           "$TREE/files/etc/hotplug.d/iface/"* \
-           "$TREE/files/etc/uci-defaults/"* \
-           "$TREE/package/luci/luci-app-mini-diskmanager/root/etc/uci-defaults/setup_prm.sh" \
-           "$TREE/package/luci/luci-app-mini-diskmanager/root/usr/libexec/rpcd/minidiskmanager" \
-           "$TREE/package/luci/luci-app-tailscale-community/root/etc/init.d/tailscale-settings" \
-           "$TREE/package/luci/luci-app-tailscale-community/root/etc/uci-defaults/99-tailscale-settings" \
-           "$TREE/package/luci/luci-app-tailscale-community/root/usr/libexec/tailscale-setup-firewall" \
-           "$TREE/package/luci/luci-app-dockerman/root/etc/init.d/dockerman" \
-           "$TREE/package/luci/luci-app-autoreboot/root/etc/init.d/autoreboot" 2>/dev/null || true
+for _base in "$TREE/files" "$TREE/package/luci"; do
+	[ -d "$_base" ] || continue
+	find "$_base" -type f \
+		\( -path '*/etc/init.d/*' -o -path '*/etc/uci-defaults/*' \
+		   -o -path '*/etc/hotplug.d/*' -o -path '*/usr/libexec/*' \
+		   -o -path '*/usr/bin/*' -o -path '*/files/*.init' \
+		   -o -path '*/files/*.hotplug' -o -path '*/files/*.uci-default' \
+		   -o -name dhcpvalid.sh \) \
+		-exec chmod 0755 {} + 2>/dev/null || true
+done
 
 for _tgz in "$TREE/package/luci/smartdns"/smartdns-*.tar.gz \
             "$TREE/package/luci/tailscale"/tailscale-*.tar.gz; do
