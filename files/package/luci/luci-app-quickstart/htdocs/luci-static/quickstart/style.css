@@ -3,3 +3,7 @@
 #page .network-message li[data-v-e187efe4],#page .network-message li[data-v-5eefd6ee]{color:var(--text-color,inherit)}
 #page code[data-v-3d6d1dea]{background-color:transparent;color:var(--text-color,inherit)}
 #page code[data-v-3d6d1dea] p{color:var(--text-color,inherit)}
+.container .table-wrapper .table-header[data-v-3dabb970]{background-color:var(--tag-bg-color);border-bottom-color:var(--border-color)}
+.container .table-wrapper .table-row[data-v-3dabb970]{border-bottom-color:var(--border-color)}
+.container .table-wrapper .table-row[data-v-3dabb970]:hover{background-color:rgba(127,127,127,.12)}
+.container .table-wrapper .add-row[data-v-3dabb970]:hover{background-color:rgba(59,130,246,.16)}
