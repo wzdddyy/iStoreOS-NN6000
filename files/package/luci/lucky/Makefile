@@ -76,10 +76,6 @@ define Package/lucky/conffiles
 /etc/config/lucky
 endef
 
-# Wanji (万吉) build ships as a prebuilt tarball inside the package dir.
-# Extract it straight from $(CURDIR) instead of going through DL_DIR /
-# PKG_SOURCE_URL, so the build never depends on a GitHub release download
-# succeeding (that previously made `make` fail in ~1s on flaky networks).
 define Build/Prepare
 	@[ -n "$(LUCKY_ARCH_TARBALL)" ] || { \
 		echo "ERROR: no lucky tarball for ARCH=$(ARCH) (LUCKY_ARCH=$(LUCKY_ARCH)) in $(CURDIR)" >&2; \
