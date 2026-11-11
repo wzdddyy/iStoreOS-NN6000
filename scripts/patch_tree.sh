@@ -212,6 +212,9 @@ P "target/linux/qualcommax/ipq60xx/base-files/etc/hotplug.d/firmware/11-ath11k-c
 P "target/linux/qualcommax/ipq60xx/base-files/lib/upgrade/platform.sh" \
   "emmc-upgrade" "before" "a_default" "platform.block" 0
 
+P "target/linux/qualcommax/ipq60xx/base-files/lib/upgrade/platform.sh" \
+  "emmc-pre-upgrade" "append" "-" "platform-pre.block" 0
+
 P "package/firmware/ipq-wifi/Makefile" \
   "wifi-board-list" "after" "a_iodata_list" "ipqwifi-boards.block" 1
 
