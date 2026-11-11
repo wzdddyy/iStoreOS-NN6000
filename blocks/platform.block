@@ -27,22 +27,31 @@
 		else
 			CI_ROOTPART="rootfs"
 		fi
-		if [ "$SAVE_CONFIG" = "0" ]; then
-			local ovl squash_kb off rootdev
-			ovl="$(find_mmc_part "rootfs_data" 2>/dev/null)"
-			if [ -n "$ovl" ]; then
-				dd if=/dev/zero of="$ovl" bs=4096 count=256 2>/dev/null
-				sync
-			else
+		if [ -z "$UPGRADE_BACKUP" ]; then
+			local ovl off rootdev squash_bytes
+			ovl="${NN_OVERLAY_DEV}"
+			off="${NN_OVERLAY_OFF:-0}"
+			case "$off" in ''|*[!0-9]*) off=0 ;; esac
+			if [ -z "$ovl" ]; then
+				ovl="$(find_mmc_part "rootfs_data" 2>/dev/null)"
+				off=0
+			fi
+			if [ -z "$ovl" ]; then
 				rootdev="$EMMC_ROOT_DEV"
 				[ -n "$rootdev" ] || rootdev="$(find_mmc_part "$CI_ROOTPART" "$CI_ROOTDEV")"
-				squash_kb="$(df -k /rom 2>/dev/null | awk 'NR==2 {print $2}')"
-				if [ -n "$rootdev" ] && [ -n "$squash_kb" ] && [ "$squash_kb" -gt 0 ] 2>/dev/null; then
-					off=$(( (squash_kb * 1024 + 4095) / 4096 * 4096 ))
-					dd if=/dev/zero of="$rootdev" bs=4096 \
-						seek=$(( off / 4096 )) count=256 2>/dev/null
-					sync
+				squash_bytes=""
+				if [ -n "$rootdev" ]; then
+					squash_bytes="$(hexdump -v -s 40 -n 4 -e '1/4 "%u"' "$rootdev" 2>/dev/null)"
 				fi
+				if [ -n "$squash_bytes" ] && [ "$squash_bytes" -gt 0 ] 2>/dev/null; then
+					ovl="$rootdev"
+					off=$(( (squash_bytes + 4095) / 4096 * 4096 ))
+				fi
+			fi
+			if [ -b "$ovl" ]; then
+				dd if=/dev/zero of="$ovl" bs=4096 \
+					seek=$(( off / 4096 )) count=256 2>/dev/null
+				sync
 			fi
 		fi
 		emmc_do_upgrade "$1"
