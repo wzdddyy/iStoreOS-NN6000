@@ -44,12 +44,28 @@ jobs:
         run: |
           echo "commit_hash=$(git rev-parse --short HEAD)" >> "$GITHUB_OUTPUT"
           echo "commit_date=$(git log -1 --format=%cI)" >> "$GITHUB_OUTPUT"
-          # kernel version lives in target/linux/generic/kernel-<patchver>
-          KV=""
-          if [ -f target/linux/generic/kernel-6.12 ]; then
-            KV=$(grep -m1 '^LINUX_VERSION-6.12' target/linux/generic/kernel-6.12 | sed 's/.*= *//' | tr -d '[:space:]')
+          KERNEL_LINE=""
+          for kf in target/linux/generic/kernel-*; do
+            [ -f "$kf" ] || continue
+            KVER=${kf##*-}
+            KFULL=$(grep -m1 "^LINUX_VERSION-${KVER}" "$kf" 2>/dev/null | sed 's/.*= *//' | tr -d '[:space:]')
+            [ -n "$KFULL" ] && KERNEL_LINE="${KERNEL_LINE:+${KERNEL_LINE},}${KFULL}"
+          done
+          [ -n "$KERNEL_LINE" ] || KERNEL_LINE="unknown"
+          echo "kernel_version=${KERNEL_LINE}" >> "$GITHUB_OUTPUT"
+          IS_NUM=""
+          IS_CODE=""
+          if [ -f include/version.mk ]; then
+            IS_NUM=$(awk -F'[(),]' '/^VERSION_NUMBER/{for(i=1;i<=NF;i++) if($i ~ /^[0-9]+\.[0-9]+\.[0-9]+$/){print $i; exit}}' include/version.mk)
+            IS_CODE=$(git describe --tags --abbrev=0 2>/dev/null | sed 's/^v//')
+            case "$IS_CODE" in
+              r[0-9]* ) : ;;
+              * ) IS_CODE="" ;;
+            esac
           fi
-          echo "kernel_version=6.12${KV}" >> "$GITHUB_OUTPUT"
+          DISTRIB_FULL="istoreos-${IS_NUM}"
+          [ -n "$IS_CODE" ] && DISTRIB_FULL="${DISTRIB_FULL} ${IS_CODE}"
+          echo "distrib_full=${DISTRIB_FULL}" >> "$GITHUB_OUTPUT"
 
       - name: Install build dependencies
         run: |
@@ -188,7 +204,7 @@ jobs:
 
             - **目标设备**: LINK_NN6000
             - **平台**: qualcommax/ipq60xx (ipq6000)
-            - **iStoreOS 分支**: ${{ env.ISTOREOS_BRANCH }}
+            - **iStoreOS 分支**: ${{ steps.info.outputs.distrib_full }}
             - **iStoreOS 提交**: ${{ steps.info.outputs.commit_hash }} (${{ steps.info.outputs.commit_date }})
             - **内核版本**: ${{ steps.info.outputs.kernel_version }}
             - **编译日期**: ${{ steps.ts.outputs.human }}
