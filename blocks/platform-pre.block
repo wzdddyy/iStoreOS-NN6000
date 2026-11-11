@@ -1,0 +1,21 @@
+platform_pre_upgrade() {
+	local src backing off
+	src="$(awk '$2 == "/overlay" { print $1; exit }' /proc/mounts 2>/dev/null)"
+	case "$src" in
+		/dev/loop*)
+			backing="$(cat "/sys/block/${src##*/}/loop/backing_file" 2>/dev/null)"
+			off="$(cat "/sys/block/${src##*/}/loop/offset" 2>/dev/null)"
+			case "$backing" in
+				/dev/*)
+					export NN_OVERLAY_DEV="$backing"
+					export NN_OVERLAY_OFF="${off:-0}"
+					;;
+			esac
+			;;
+		/dev/*)
+			export NN_OVERLAY_DEV="$src"
+			export NN_OVERLAY_OFF=0
+			;;
+	esac
+	return 0
+}
