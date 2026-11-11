@@ -48,8 +48,13 @@ jobs:
           for kf in target/linux/generic/kernel-*; do
             [ -f "$kf" ] || continue
             KVER=${kf##*-}
-            KFULL=$(grep -m1 "^LINUX_VERSION-${KVER}" "$kf" 2>/dev/null | sed 's/.*= *//' | tr -d '[:space:]')
-            [ -n "$KFULL" ] && KERNEL_LINE="${KERNEL_LINE:+${KERNEL_LINE},}${KFULL}"
+            KSUF=$(grep -m1 "^LINUX_VERSION-${KVER}" "$kf" 2>/dev/null | sed 's/.*= *//' | tr -d '[:space:]')
+            [ -n "$KSUF" ] || continue
+            case "$KSUF" in
+              .*) KFULL="${KVER}${KSUF}" ;;
+              *) KFULL="$KSUF" ;;
+            esac
+            KERNEL_LINE="${KERNEL_LINE:+${KERNEL_LINE},}${KFULL}"
           done
           [ -n "$KERNEL_LINE" ] || KERNEL_LINE="unknown"
           echo "kernel_version=${KERNEL_LINE}" >> "$GITHUB_OUTPUT"
