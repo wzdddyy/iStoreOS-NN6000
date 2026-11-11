@@ -62,7 +62,7 @@ jobs:
           IS_CODE=""
           if [ -f include/version.mk ]; then
             IS_NUM=$(awk -F'[(),]' '/^VERSION_NUMBER/{for(i=1;i<=NF;i++) if($i ~ /^[0-9]+\.[0-9]+\.[0-9]+$/){print $i; exit}}' include/version.mk)
-            IS_CODE=$(git describe --tags --abbrev=0 2>/dev/null | sed 's/^v//')
+            IS_CODE=$(bash scripts/getver.sh 2>/dev/null | sed 's/-.*//')
             case "$IS_CODE" in
               r[0-9]* ) : ;;
               * ) IS_CODE="" ;;
