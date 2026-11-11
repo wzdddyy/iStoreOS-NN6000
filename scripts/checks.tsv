@@ -4,6 +4,7 @@
 
 has|eMMC A/B sysupgrade branch|target/linux/qualcommax/ipq60xx/base-files/lib/upgrade/platform.sh|link,nn6000-v1
 has|pre-upgrade records real overlay device|target/linux/qualcommax/ipq60xx/base-files/lib/upgrade/platform.sh|NN_OVERLAY_DEV
+has|package manager allows untrusted local apk|files/usr/libexec/package-manager-call|--allow-untrusted
 has|bootconfig kernel slot @128|target/linux/qualcommax/ipq60xx/base-files/lib/upgrade/platform.sh|-s 128
 has|bootconfig rootfs slot @148|target/linux/qualcommax/ipq60xx/base-files/lib/upgrade/platform.sh|-s 148
 not|ath11k-ahb remains in target defaults|target/linux/qualcommax/Makefile|kmod-ath11k-ahb
