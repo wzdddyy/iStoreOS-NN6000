@@ -2,7 +2,7 @@
 # immortalwrt 包源 + openwrt target 源。base 单独放 base.list：首页会 curl distfeeds.list 里 base 行的 .asc，immortalwrt 没有，会一直报"软件源错误"。
 DIR=/etc/apk/repositories.d
 BASE=https://mirrors.nju.edu.cn/immortalwrt/releases/25.12-SNAPSHOT
-OWRT=https://mirror.zju.edu.cn/openwrt/releases/25.12.5
+OWRT=https://mirror.zju.edu.cn/openwrt/releases/25.12.6
 [ -d "$DIR" ] || exit 0
 
 cat >"$DIR/base.list" <<EOF
