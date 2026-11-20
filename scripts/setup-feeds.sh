@@ -39,6 +39,12 @@ GIT_TERMINAL_PROMPT=0 git clone --depth 1 \
 	package/ghboost
 rm -rf package/ghboost/.git package/ghboost/.github
 
+rm -rf package/luci/luci-app-wzupdate
+GIT_TERMINAL_PROMPT=0 git clone --depth 1 \
+	https://github.com/wzdddyy/luci-app-wzupdate.git \
+	package/luci/luci-app-wzupdate
+rm -rf package/luci/luci-app-wzupdate/.git package/luci/luci-app-wzupdate/.github
+
 for p in "$REPO_DIR"/patches/*.patch; do
 	patch -p1 -i "$p"
 done
