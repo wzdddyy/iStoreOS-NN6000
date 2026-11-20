@@ -3,6 +3,7 @@
 | 文件 | 适用机型 | `rootfs_data` |
 | --- | --- | --- |
 | [`NN6000_UBOOT.bin`](https://raw.githubusercontent.com/wzdddyy/iStoreOS-NN6000/main/partition/NN6000_UBOOT.bin) | NN6000 v1 / v2，4 GB eMMC 及以上 | 2 GiB |
+| [`uboot-ipq60xx-link_nn6000-261119_213729_b95b887.bin`](https://raw.githubusercontent.com/wzdddyy/iStoreOS-NN6000/main/partition/uboot-ipq60xx-link_nn6000-261119_213729_b95b887.bin) | 已刷旧版镜像，仅单独升级 U-Boot | — |
 
 GPT 条目数 20（14 个已用，第 15 个之后为空槽，可直接新建分区）
 
@@ -68,8 +69,37 @@ sh /tmp/userdata-autosize
 
 - `0:HLOS` / `0:HLOS_1` 内核分区：统一 32 MiB
 - `rootfs` / `rootfs_1` 固件分区：统一 512 MiB
-- 已内置 chenxin527 26.08.16 版 uBootKit（`U-Boot 2016.01-3011049`），刷入分区镜像即可直接进入 UBOOT
+- 已内置 26.11.19 版 uBootKit（`U-Boot 2016.01-b95b887`，支持热重启），刷入分区镜像即可直接进入 UBOOT
 - `rootfs_data` overlay 分区： 2 GiB，可自行调整
 - 没有 `rootfs_data` 分区时，用户数据自动挂载到 `rootfs` 的剩余空间
 - 支持此设备的固件源码都可以使用本分区表；其中 OpenWrt / immortalwrt 原生支持，iStoreOS 需配套 `istoreos-boot.sh` 补丁（优先使用 `rootfs_data`）。
 - eMMC 剩余空间可自行分配（需先把 GPT 扩到磁盘末尾），或使用 `userdata-autosize` 自动分配。
+
+## 单独更新 U-Boot
+
+已经刷过旧版分区镜像、只想升级 U-Boot（26.11.19 版，新增热重启支持）的，不用重刷整盘，直接写 `0:APPSBL` 分区即可：
+
+下载：[`uboot-ipq60xx-link_nn6000-261119_213729_b95b887.bin`](https://raw.githubusercontent.com/wzdddyy/iStoreOS-NN6000/main/partition/uboot-ipq60xx-link_nn6000-261119_213729_b95b887.bin)（640 KiB，SHA-256 `1406cb73dac3466c973c10b40cfabdc36b82cd07d6476652c73aab4227eddedf`）
+
+1. 上传到设备 `/tmp`，确认分区对应设备：
+
+```sh
+grep -H PARTNAME /sys/class/block/mmcblk0p*/uevent | grep APPSBL
+```
+
+2. 备份原 U-Boot（把下面命令中的 `mmcblk0p8` 换成上一步查到的设备）：
+
+```sh
+dd if=/dev/mmcblk0p8 of=/tmp/uboot-backup.bin bs=64k
+```
+
+3. 写入并读回校验：
+
+```sh
+dd if=/tmp/uboot-ipq60xx-link_nn6000-261119_213729_b95b887.bin of=/dev/mmcblk0p8 bs=64k conv=fsync
+dd if=/dev/mmcblk0p8 bs=64k count=10 | sha256sum
+```
+
+读回值与上面的 SHA-256 一致即写入成功。重启进入 U-Boot，版本应显示 `U-Boot 2016.01-b95b887`。
+
+> 注意：必须确认目标是 `PARTNAME=0:APPSBL` 的分区，写错分区会导致设备无法启动。
