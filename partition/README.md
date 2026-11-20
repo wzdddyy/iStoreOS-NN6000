@@ -3,7 +3,7 @@
 | 文件 | 适用机型 | `rootfs_data` |
 | --- | --- | --- |
 | [`NN6000_UBOOT.bin`](https://raw.githubusercontent.com/wzdddyy/iStoreOS-NN6000/main/partition/NN6000_UBOOT.bin) | NN6000 v1 / v2，4 GB eMMC 及以上 | 2 GiB |
-| [`uboot-ipq60xx-link_nn6000-261119_213729_b95b887.bin`](https://raw.githubusercontent.com/wzdddyy/iStoreOS-NN6000/main/partition/uboot-ipq60xx-link_nn6000-261119_213729_b95b887.bin) | 已刷旧版镜像，仅单独升级 U-Boot | — |
+| [`uboot-ipq60xx-link_nn6000-261119_213729_b95b887.bin`](https://raw.githubusercontent.com/wzdddyy/iStoreOS-NN6000/main/partition/uboot-ipq60xx-link_nn6000-261119_213729_b95b887.bin) | 已刷旧版镜像，仅单独升级 U-Boot | 支持热重启 |
 
 GPT 条目数 20（14 个已用，第 15 个之后为空槽，可直接新建分区）
 
