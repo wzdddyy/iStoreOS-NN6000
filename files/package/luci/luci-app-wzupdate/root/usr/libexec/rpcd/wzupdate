@@ -1,0 +1,167 @@
+#!/bin/sh
+WZU_LIB=1 . /usr/libexec/wzupdate/engine.sh
+
+do_status() {
+	local lv board model target ab phase pct msg newer checked
+	local rver rtag rname rsize rnote rcommit rkernel rbranch rbuild
+	local pslot pver pprev ptime
+	local enabled auto image channel keep_config uptime up days hours
+	local remote_json pending_json log_json en_bool auto_bool keep_bool
+	local e_lv e_model e_board e_target e_uptime e_phase e_msg e_image e_channel
+	local ab_miss labels e_abmiss e_labels
+	local kernel dist_id dist_rel release e_kernel e_release
+
+	lv=$(local_version)
+	board=$(board_id)
+	model=$(cat /tmp/sysinfo/model 2>/dev/null)
+	target=$(image_target 2>/dev/null)
+	up=$(cut -d' ' -f1 /proc/uptime 2>/dev/null | cut -d. -f1)
+	case "$up" in ''|*[!0-9]*) up=0 ;; esac
+	days=$((up / 86400))
+	hours=$(((up % 86400) / 3600))
+	if [ "$days" -gt 0 ]; then
+		uptime="$days 天 $hours 小时"
+	else
+		uptime="$hours 小时"
+	fi
+	kernel=$(uname -r 2>/dev/null)
+	dist_id=""
+	dist_rel=""
+	dist_rev=""
+	local_commit=""
+	if [ -r /etc/openwrt_release ]; then
+		dist_id=$(. /etc/openwrt_release 2>/dev/null; printf '%s' "$DISTRIB_ID")
+		dist_rel=$(. /etc/openwrt_release 2>/dev/null; printf '%s' "$DISTRIB_RELEASE")
+		dist_rev=$(. /etc/openwrt_release 2>/dev/null; printf '%s' "${DISTRIB_REVISION:-$REVISION}")
+	fi
+	if [ -n "$dist_id" ] && [ -n "$dist_rel" ]; then
+		release="$dist_id $dist_rel"
+	elif [ -n "$dist_id" ]; then
+		release="$dist_id"
+	elif [ -n "$dist_rel" ]; then
+		release="$dist_rel"
+	else
+		release='iStoreOS'
+	fi
+	if [ -n "$dist_rev" ]; then
+		local_commit=$(printf '%s' "$dist_rev" | sed 's/.*-//')
+		local_rev=$(printf '%s' "$dist_rev" | sed 's/-.*//')
+		[ -n "$local_rev" ] && release="$release $local_rev"
+	fi
+	ab=0
+	ab_supported && ab=1
+	ab_miss=$(ab_missing 2>/dev/null)
+	labels=$(part_labels 2>/dev/null)
+	phase=$(get_state phase idle)
+	pct=$(get_state percent 0)
+	msg=$(get_state message '')
+	case "$pct" in ''|*[!0-9]*) pct=0 ;; esac
+
+	remote_json='null'
+	if [ -f "$REMOTE" ]; then
+		rver=$(kv_read "$REMOTE" REMOTE_VER '')
+		rtag=$(kv_read "$REMOTE" REMOTE_TAG '')
+		rname=$(kv_read "$REMOTE" REMOTE_NAME '')
+		rsize=$(kv_read "$REMOTE" REMOTE_SIZE 0)
+		rnote=$(kv_read "$REMOTE" REMOTE_NOTE '')
+		rcommit=$(kv_read "$REMOTE" REMOTE_COMMIT '')
+		rkernel=$(kv_read "$REMOTE" REMOTE_KERNEL '')
+		rbranch=$(kv_read "$REMOTE" REMOTE_BRANCH '')
+		rbuild=$(kv_read "$REMOTE" REMOTE_BUILD '')
+		newer=$(kv_read "$REMOTE" REMOTE_NEWER 0)
+		checked=$(kv_read "$REMOTE" CHECKED_AT '')
+		case "$rsize" in ''|*[!0-9]*) rsize=0 ;; esac
+		case "$newer" in 1) newer=true ;; *) newer=false ;; esac
+		rver=$(json_esc "$rver")
+		rtag=$(json_esc "$rtag")
+		rname=$(json_esc "$rname")
+		rnote=$(json_esc "$rnote")
+		rcommit=$(json_esc "$rcommit")
+		rkernel=$(json_esc "$rkernel")
+		rbranch=$(json_esc "$rbranch")
+		rbuild=$(json_esc "$rbuild")
+		checked=$(json_esc "$checked")
+		remote_json=$(printf '{"version":"%s","tag":"%s","name":"%s","size":%s,"notes":"%s","newer":%s,"checked":"%s","commit":"%s","kernel":"%s","branch":"%s","build":"%s"}' \
+			"$rver" "$rtag" "$rname" "$rsize" "$rnote" "$newer" "$checked" "$rcommit" "$rkernel" "$rbranch" "$rbuild")
+	fi
+
+	pending_json='null'
+	if [ -f "$PENDING" ]; then
+		pslot=$(kv_read "$PENDING" slot 1)
+		pver=$(kv_read "$PENDING" version '')
+		pprev=$(kv_read "$PENDING" prev_version '')
+		ptime=$(kv_read "$PENDING" time '')
+		case "$pslot" in ''|*[!0-9]*) pslot=1 ;; esac
+		pver=$(json_esc "$pver")
+		pprev=$(json_esc "$pprev")
+		ptime=$(json_esc "$ptime")
+		pending_json=$(printf '{"slot":%s,"version":"%s","prevVersion":"%s","time":"%s"}' \
+			"$pslot" "$pver" "$pprev" "$ptime")
+	fi
+
+	log_json=$(tail -n 80 "$LOG" 2>/dev/null |
+		awk '{gsub(/\\/,"\\\\"); gsub(/"/,"\\\""); printf "%s\"%s\"", (NR > 1 ? "," : ""), $0} END{}')
+	log_json="[${log_json}]"
+
+	enabled=$(uci_get enabled 0)
+	auto=$(uci_get auto 0)
+	image=$(uci_get image auto)
+	channel=$(uci_get channel auto)
+	keep_config=$(uci_get keep_config 1)
+	[ "$enabled" = "1" ] && en_bool=true || en_bool=false
+	[ "$auto" = "1" ] && auto_bool=true || auto_bool=false
+	[ "$keep_config" = "0" ] && keep_bool=false || keep_bool=true
+
+	e_lv=$(json_esc "$lv")
+	e_model=$(json_esc "$model")
+	e_board=$(json_esc "$board")
+	e_target=$(json_esc "$target")
+	e_uptime=$(json_esc "$uptime")
+	e_kernel=$(json_esc "$kernel")
+	e_release=$(json_esc "$release")
+	e_lcommit=$(json_esc "$local_commit")
+	e_phase=$(json_esc "$phase")
+	e_msg=$(json_esc "$msg")
+	e_image=$(json_esc "$image")
+	e_channel=$(json_esc "$channel")
+	e_abmiss=$(json_esc "$ab_miss")
+	e_labels=$(json_esc "$labels")
+
+	printf '{"ok":true,'
+	printf '"local":{"version":"%s","device":"%s","board":"%s","target":"%s","firmware":"%s","ab":%s,"abMissing":"%s","labels":"%s","uptime":"%s","kernel":"%s","release":"%s","commit":"%s"},' \
+		"$e_lv" "$e_model" "$e_board" "$e_target" "$(firmware_type)" "$ab" "$e_abmiss" "$e_labels" "$e_uptime" "$e_kernel" "$e_release" "$e_lcommit"
+	printf '"remote":%s,' "$remote_json"
+	printf '"progress":{"phase":"%s","percent":%s,"message":"%s"},' "$e_phase" "$pct" "$e_msg"
+	printf '"pending":%s,' "$pending_json"
+	printf '"settings":{"enabled":%s,"auto":%s,"image":"%s","channel":"%s","keepConfig":%s},' \
+		"$en_bool" "$auto_bool" "$e_image" "$e_channel" "$keep_bool"
+	printf '"log":%s}' "$log_json"
+}
+
+run_bg() {
+	if command -v nohup >/dev/null 2>&1; then
+		WZU_LIB=0 nohup /usr/libexec/wzupdate/engine.sh "$1" >/dev/null 2>&1 &
+	else
+		WZU_LIB=0 /usr/libexec/wzupdate/engine.sh "$1" >/dev/null 2>&1 &
+	fi
+	printf '{"ok":true}'
+}
+
+case "$1" in
+	list)
+		printf '{"status":{},"start":{},"check":{},"cancel":{},"reboot":{}}'
+		;;
+	call)
+		case "$2" in
+			status) do_status ;;
+			start) run_bg manual ;;
+			check) run_bg check ;;
+			cancel) cancel_update && printf '{"ok":true}' || printf '{"ok":false}' ;;
+			reboot) apply_update && printf '{"ok":true}' || printf '{"ok":false}' ;;
+			*) printf '{"ok":false,"error":"unknown method"}' ;;
+		esac
+		;;
+	*)
+		printf '{"ok":false}'
+		;;
+esac

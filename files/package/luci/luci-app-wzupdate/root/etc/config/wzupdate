@@ -1,0 +1,8 @@
+config wzupdate 'settings'
+	option enabled '1'
+	option auto '1'
+	option image 'auto'
+	option channel 'auto'
+	option keep_config '1'
+	option mirror 'https://ghfast.top/,https://gh-proxy.com/'
+	option repo 'wzdddyy/iStoreOS-NN6000'

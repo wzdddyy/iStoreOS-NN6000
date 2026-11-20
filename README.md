@@ -38,6 +38,7 @@
 * **hd-idle**：luci-app-hd-idle，硬盘休眠；
 * **samba4**：luci-app-samba4，网络共享；
 * **tailscale**：luci-app-tailscale，VPN异地组网；
+* **wzupdate**：luci-app-wzupdate，在线检查并更新固件，写入备份分区、重启生效，支持撤回；
 * 内核侧已经具备 dae/daed 运行所需的 eBPF/BTF 条件；
 
 

@@ -1,0 +1,13 @@
+{
+	"admin/system/wzupdate": {
+		"title": "在线更新",
+		"order": 92,
+		"action": {
+			"type": "view",
+			"path": "wzupdate/overview"
+		},
+		"depends": {
+			"acl": [ "luci-app-wzupdate" ]
+		}
+	}
+}

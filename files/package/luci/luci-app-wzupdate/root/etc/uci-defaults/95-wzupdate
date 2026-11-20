@@ -1,0 +1,24 @@
+#!/bin/sh
+if ! uci -q get wzupdate.settings >/dev/null 2>&1; then
+	uci -q set wzupdate.settings=wzupdate
+	uci -q set wzupdate.settings.enabled='1'
+	uci -q set wzupdate.settings.auto='1'
+	uci -q set wzupdate.settings.image='auto'
+	uci -q set wzupdate.settings.channel='auto'
+	uci -q set wzupdate.settings.keep_config='1'
+	uci -q set wzupdate.settings.mirror='https://ghfast.top/,https://gh-proxy.com/'
+	uci -q set wzupdate.settings.repo='wzdddyy/iStoreOS-NN6000'
+	uci -q commit wzupdate
+fi
+
+uci -q get wzupdate.settings.keep_config >/dev/null 2>&1 || {
+	uci -q set wzupdate.settings.keep_config='1'
+	uci -q commit wzupdate
+}
+
+chmod 0755 /usr/libexec/wzupdate/engine.sh \
+	/usr/libexec/wzupdate/autocheck \
+	/usr/libexec/rpcd/wzupdate 2>/dev/null
+
+[ -x /etc/init.d/wzupdate ] && /etc/init.d/wzupdate enable
+exit 0

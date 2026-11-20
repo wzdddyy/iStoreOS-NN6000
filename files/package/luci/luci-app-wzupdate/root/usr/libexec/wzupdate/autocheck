@@ -1,0 +1,10 @@
+#!/bin/sh
+
+last=0
+while true; do
+	sleep 60
+	now=$(date +%s)
+	[ $((now - last)) -lt 3600 ] && continue
+	/usr/libexec/wzupdate/engine.sh auto >/dev/null 2>&1
+	last=$(date +%s)
+done

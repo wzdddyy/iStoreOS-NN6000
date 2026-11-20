@@ -18,5 +18,7 @@ file|tailscale source staged to dl/|dl/tailscale-*.tar.gz|
 has|seed ships nss front-ends|R:config/nn6000.seed|CONFIG_PACKAGE_kmod-qca-nss-drv-bridge-mgr=y
 has|seed enables bridge feature|R:config/nn6000.seed|CONFIG_NSS_DRV_BRIDGE_ENABLE=y
 has|seed enables vlan feature|R:config/nn6000.seed|CONFIG_NSS_DRV_VLAN_ENABLE=y
+has|seed selects wzupdate plugin|R:config/nn6000.seed|CONFIG_PACKAGE_luci-app-wzupdate=y
+file|wzupdate package vendored|package/luci/luci-app-wzupdate/Makefile|
 has|device seed selects v1 + v1-nowifi|R:config/devices/*.seed|DEVICE_link_nn6000-v1-nowifi=y
 has|device seed selects v2 + v2-nowifi|R:config/devices/*.seed|DEVICE_link_nn6000-v2-nowifi=y
