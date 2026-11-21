@@ -777,3 +777,14 @@ msgstr "temu"
 #~ msgstr ""
 #~ "Tworzy interfejs tailscale, dodaje go do strefy zapory i konfiguruje "
 #~ "przekazywanie między sieciami LAN, Tailscale i WAN."
+
+#: luci-app-tailscale-community/htdocs/luci-static/resources/view/tailscale.js:895
+msgid "Click Refresh to load logs."
+msgstr "Kliknij „Odśwież”, aby wczytać dziennik."
+
+#: luci-app-tailscale-community/htdocs/luci-static/resources/view/tailscale.js:722
+msgid "Configuration committed, reloading firewall. This can take a moment."
+msgstr ""
+"Konfiguracja zatwierdzona, ponowne ładowanie zapory. Może to chwilę "
+"potrwać."
+

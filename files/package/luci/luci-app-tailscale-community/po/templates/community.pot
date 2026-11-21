@@ -674,3 +674,12 @@ msgstr ""
 #: luci-app-tailscale-community/htdocs/luci-static/resources/view/tailscale.js:281
 msgid "ago"
 msgstr ""
+
+#: luci-app-tailscale-community/htdocs/luci-static/resources/view/tailscale.js:895
+msgid "Click Refresh to load logs."
+msgstr ""
+
+#: luci-app-tailscale-community/htdocs/luci-static/resources/view/tailscale.js:722
+msgid "Configuration committed, reloading firewall. This can take a moment."
+msgstr ""
+

@@ -781,3 +781,14 @@ msgstr "atrás"
 #~ msgstr ""
 #~ "Crea la interfaz tailscale, la agrega a una zona del cortafuegos y "
 #~ "configura el reenvío entre la LAN, Tailscale y la WAN."
+
+#: luci-app-tailscale-community/htdocs/luci-static/resources/view/tailscale.js:895
+msgid "Click Refresh to load logs."
+msgstr "Haga clic en «Actualizar» para cargar el registro."
+
+#: luci-app-tailscale-community/htdocs/luci-static/resources/view/tailscale.js:722
+msgid "Configuration committed, reloading firewall. This can take a moment."
+msgstr ""
+"Configuración confirmada, recargando el cortafuegos. Esto puede "
+"tardar un momento."
+

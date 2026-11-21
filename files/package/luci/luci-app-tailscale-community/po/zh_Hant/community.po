@@ -730,3 +730,12 @@ msgstr "前"
 #~ "It creates the tailscale interface, adds it to a firewall zone, and "
 #~ "sets up forwarding between LAN, Tailscale and WAN."
 #~ msgstr "它會建立 tailscale 介面、加入防火牆區域，並設定 LAN、Tailscale 與 WAN 之間的轉送。"
+
+#: luci-app-tailscale-community/htdocs/luci-static/resources/view/tailscale.js:895
+msgid "Click Refresh to load logs."
+msgstr "點選「重新整理」載入日誌。"
+
+#: luci-app-tailscale-community/htdocs/luci-static/resources/view/tailscale.js:722
+msgid "Configuration committed, reloading firewall. This can take a moment."
+msgstr "設定已提交，正在重新載入防火牆。這可能需要一點時間。"
+
