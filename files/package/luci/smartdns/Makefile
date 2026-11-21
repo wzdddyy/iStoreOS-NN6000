@@ -3,7 +3,7 @@
 # This is free software, licensed under the GNU General Public License v3.
 #
 # Vendored from the iStoreOS packages feed (net/smartdns), version bumped from
-# 46.1 to 48.4 to match the vendored luci-app-smartdns (1.2026.48.2) -- the
+# 46.1 to 48.5 to match the vendored luci-app-smartdns (1.2026.48.3) -- the
 # 48.x UI expects configuration surfaces the 46.1 core does not provide.
 # +libatomic is a new dependency since 48.x (per upstream package/openwrt).
 # The source tarball sits next to this file and is staged into dl/ by
@@ -12,12 +12,12 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=smartdns
-PKG_VERSION:=48.4
+PKG_VERSION:=48.5
 PKG_RELEASE:=1
 
 PKG_SOURCE:=$(PKG_NAME)-Release$(PKG_VERSION).tar.gz
 PKG_SOURCE_URL:=https://codeload.github.com/pymumu/smartdns/tar.gz/refs/tags/Release$(PKG_VERSION)?
-PKG_HASH:=b07abba99e921f262ba47588e12f5b36dd849f79c0145542440eb6b7eed80553
+PKG_HASH:=6ee3ad6fbf6da63d0fb160dfca649b81c107d93e0658e758495696f0cbaf2216
 PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)-Release$(PKG_VERSION)
 
 PKG_MAINTAINER:=Nick Peng <pymumu@gmail.com>
