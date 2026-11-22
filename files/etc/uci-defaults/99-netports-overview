@@ -1,0 +1,24 @@
+#!/bin/sh
+
+INCLUDE_DIR=/www/luci-static/resources/view/status/include
+
+if [ -f "$INCLUDE_DIR/29_ports.js" ]; then
+	mv "$INCLUDE_DIR/29_ports.js" "$INCLUDE_DIR/29_ports.js.disabled"
+fi
+
+if [ -f "$INCLUDE_DIR/25_netports.js" ]; then
+	mv "$INCLUDE_DIR/25_netports.js" "$INCLUDE_DIR/31_netports.js"
+fi
+
+NETPORTS_CSS=/www/luci-static/resources/netports/netports.css
+if [ -f "$NETPORTS_CSS" ] && ! grep -qF 'NN6000_NETPORTS_VERSION_HIDDEN' "$NETPORTS_CSS"; then
+	cat >> "$NETPORTS_CSS" <<'EOF'
+
+/* NN6000_NETPORTS_VERSION_HIDDEN */
+.netports-copyright {
+	display: none !important;
+}
+EOF
+fi
+
+exit 0
