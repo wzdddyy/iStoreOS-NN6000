@@ -22,3 +22,8 @@ has|seed selects wzupdate plugin|R:config/nn6000.seed|CONFIG_PACKAGE_luci-app-wz
 has|wzupdate cloned from online repo|R:scripts/setup-feeds.sh|https://github.com/wzdddyy/luci-app-wzupdate.git
 has|device seed selects v1 + v1-nowifi|R:config/devices/*.seed|DEVICE_link_nn6000-v1-nowifi=y
 has|device seed selects v2 + v2-nowifi|R:config/devices/*.seed|DEVICE_link_nn6000-v2-nowifi=y
+file|netports default configuration shipped|files/etc/config/luci_netports|
+has|netports default configuration includes all five ports|files/etc/config/luci_netports|option ifname 'lan4'
+has|native ports status retained but disabled|files/etc/uci-defaults/99-netports-overview|29_ports.js.disabled
+has|netports status moved after network status|files/etc/uci-defaults/99-netports-overview|31_netports.js
+has|netports version label hidden|files/etc/uci-defaults/99-netports-overview|NN6000_NETPORTS_VERSION_HIDDEN
