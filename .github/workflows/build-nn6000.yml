@@ -213,3 +213,48 @@ jobs:
             - **iStoreOS 提交**: ${{ steps.info.outputs.commit_hash }} (${{ steps.info.outputs.commit_date }})
             - **内核版本**: ${{ steps.info.outputs.kernel_version }}
             - **编译日期**: ${{ steps.ts.outputs.human }}
+
+      - name: Cleanup Old Versions
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "=========================================="
+          echo "Cleaning up old versions..."
+          echo "=========================================="
+
+          echo "All releases:"
+          gh release list --limit 200 --json tagName,createdAt --jq 'sort_by(.createdAt) | reverse | .[] | {tagName: .tagName, createdAt: .createdAt}'
+          echo ""
+
+          RELEASES=$(gh release list --limit 200 --json tagName,createdAt --jq 'sort_by(.createdAt) | reverse | .[10:] | .[].tagName')
+
+          if [ -z "$RELEASES" ]; then
+            echo "No releases to clean up"
+          else
+            echo "Deleting old releases:"
+            echo "$RELEASES" | while read -r tag; do
+              if [ -n "$tag" ]; then
+                echo "  Deleting: $tag"
+                gh release delete "$tag" --cleanup-tag --yes 2>/dev/null || true
+              fi
+            done
+          fi
+
+          echo ""
+          echo "Release cleanup completed"
+
+          echo ""
+          echo "Cleaning up old workflow runs..."
+          echo "All workflow runs:"
+          gh run list --workflow build-nn6000.yml --limit 200 --json name,databaseId,createdAt --jq 'sort_by(.createdAt) | reverse | .[] | {name: .name, databaseId: .databaseId, createdAt: .createdAt}'
+          echo ""
+
+          gh run list --workflow build-nn6000.yml --limit 200 --json databaseId,createdAt --jq 'sort_by(.createdAt) | reverse | .[10:] | .[].databaseId' | while read -r run_id; do
+            if [ -n "$run_id" ]; then
+              echo "  Deleting workflow run: $run_id"
+              gh run delete "$run_id" 2>/dev/null || true
+            fi
+          done
+
+          echo "Workflow run cleanup completed"
