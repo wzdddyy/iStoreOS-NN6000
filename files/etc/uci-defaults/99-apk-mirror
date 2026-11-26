@@ -22,3 +22,7 @@ for f in "$DIR"/*.list; do
 	sed -i 's|https://downloads\.openwrt\.org|https://mirror.zju.edu.cn/openwrt|g' "$f"
 	sed -i '/\/kmods\//d' "$f"
 done
+
+cat >"$DIR/daeuniverse.list" <<EOF
+@daeuniverse https://openwrt.daeuniverse.org/25.12/packages/aarch64_cortex-a53/packages.adb
+EOF
