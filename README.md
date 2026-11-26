@@ -24,23 +24,27 @@
 
 ## 内置软件
 
-* **iStoreOS 应用商店**：luci-app-store，store商店；
-* **dockerman**：luci-app-dockerman，Docker 容器管理；
-* **quickstart**：luci-app-quickstart，开机向导，自动配置上网；
-* **autoreboot**：luci-app-autoreboot，定时重启；
-* **ttyd**：luci-app-ttyd，网页终端；
-* **AdGuardHome**：luci-app-adguardhome，广告过滤 DNS 服务器；
-* **lucky**：luci-app-lucky，端口转发 + 反向代理 + DDNS + Web服务 + 网络唤醒；
-* **ghboost**：GitHub 访问优化（DoH 防污染解析 + 透明重定向 + 实测选路）；
-* **mini-diskmanager**：luci-app-mini-diskmanager，磁盘管理工具；
-* **smartdns**：luci-app-smartdns，本地 DNS 服务器，支持分组、分流、缓存与多上游并发查询；
-* **upnp**：luci-app-upnp，UPnP IGD 和 PCP/NAT-PMP 服务；
-* **hd-idle**：luci-app-hd-idle，硬盘休眠；
-* **samba4**：luci-app-samba4，网络共享；
-* **tailscale**：luci-app-tailscale，VPN异地组网；
-* **wzupdate**：luci-app-wzupdate，在线检查并更新固件，写入备份分区、重启生效，支持撤回；
-* 内核侧已经具备 dae/daed 运行所需的 eBPF/BTF 条件；
+| 软件 | 包名 | 说明 |
+| --- | --- | --- |
+| store | luci-app-store | store商店 |
+| dockerman | luci-app-dockerman | Docker 容器管理 |
+| quickstart | luci-app-quickstart | 开机向导，自动配置上网 |
+| autoreboot | luci-app-autoreboot | 定时重启 |
+| ttyd | luci-app-ttyd | 网页终端 |
+| AdGuardHome | luci-app-adguardhome | 广告过滤 DNS 服务器 |
+| lucky | luci-app-lucky | 端口转发 + 反向代理 + DDNS + Web服务 + 网络唤醒 |
+| ghboost | luci-app-ghboost | GitHub 访问优化（DoH 防污染解析 + 透明重定向） |
+| mini-diskmanager | luci-app-mini-diskmanager | 磁盘管理工具 |
+| smartdns | luci-app-smartdns | 本地 DNS 服务器，支持分组、分流、缓存与多上游并发查询 |
+| upnp | luci-app-upnp | UPnP IGD 和 PCP/NAT-PMP 服务 |
+| hd-idle | luci-app-hd-idle | 硬盘休眠 |
+| samba4 | luci-app-samba4 | 网络共享 |
+| tailscale | luci-app-tailscale | VPN异地组网 |
+| wzupdate | luci-app-wzupdate | 在线检查并更新固件，写入备份分区、重启生效，支持撤回 |
 
+> 内核侧已经具备 dae/daed 运行所需的 eBPF/BTF 条件；
+>
+> 添加hook支持，以及所需安装源；
 
 ## 目录结构
 
