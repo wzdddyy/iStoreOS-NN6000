@@ -1,54 +1,91 @@
 #!/bin/sh
-# Dynamically switch IPv6 relay config based on WAN protocol.
-# Triggered when WAN interface comes up.
 
 [ "$INTERFACE" = "wan" ] || exit 0
-[ "$ACTION" = "ifup" ] || [ "$ACTION" = "ifupdate" ] || exit 0
+case "$ACTION" in
+	ifup|ifupdate) ;;
+	*) exit 0 ;;
+esac
 
-# Avoid re-entrancy loops
-[ -f /tmp/.ipv6-relay-busy ] && exit 0
+LOCK=/tmp/.ipv6-relay.lock
+mkdir "$LOCK" 2>/dev/null || exit 0
+cleanup() { rmdir "$LOCK" 2>/dev/null; }
+trap cleanup EXIT INT TERM HUP
+
+is_relay() {
+	[ "$(uci -q get dhcp.wan.master)" = "1" ] &&
+		[ "$(uci -q get dhcp.wan.ra)" = "relay" ] &&
+		[ "$(uci -q get dhcp.wan.dhcpv6)" = "relay" ] &&
+		[ "$(uci -q get dhcp.wan.ndp)" = "relay" ] &&
+		[ "$(uci -q get dhcp.lan.ra)" = "hybrid" ] &&
+		[ "$(uci -q get dhcp.lan.dhcpv6)" = "hybrid" ] &&
+		[ "$(uci -q get dhcp.lan.ndp)" = "hybrid" ] &&
+		[ -z "$(uci -q get dhcp.lan.ra_slaac)" ] &&
+		[ "$(uci -q get network.lan.ip6assign)" = "64" ] &&
+		[ -z "$(uci -q get network.wan.ipv6)" ] &&
+		[ -z "$(uci -q get network.lan.ipv6)" ]
+}
+
+is_server() {
+	[ -z "$(uci -q get dhcp.wan.master)" ] &&
+		[ -z "$(uci -q get dhcp.wan.ra)" ] &&
+		[ -z "$(uci -q get dhcp.wan.dhcpv6)" ] &&
+		[ -z "$(uci -q get dhcp.wan.ndp)" ] &&
+		[ "$(uci -q get dhcp.lan.ra)" = "server" ] &&
+		[ "$(uci -q get dhcp.lan.dhcpv6)" = "server" ] &&
+		[ -z "$(uci -q get dhcp.lan.ndp)" ] &&
+		[ "$(uci -q get dhcp.lan.ra_slaac)" = "1" ] &&
+		[ "$(uci -q get network.lan.ip6assign)" = "60" ] &&
+		[ -z "$(uci -q get network.wan.ipv6)" ] &&
+		[ -z "$(uci -q get network.lan.ipv6)" ]
+}
 
 wan_proto=$(uci -q get network.wan.proto)
+old_assign=$(uci -q get network.lan.ip6assign)
 
 if [ "$wan_proto" = "dhcp" ]; then
-    # Already in relay mode?
-    [ "$(uci -q get dhcp.wan.ra)" = "relay" ] && exit 0
-
-    touch /tmp/.ipv6-relay-busy
-    uci -q delete network.wan.ipv6
-    uci -q delete network.lan.ipv6
-    uci set network.lan.ip6assign='64'
-    uci set dhcp.wan.master='1'
-    uci set dhcp.wan.ra='relay'
-    uci set dhcp.wan.dhcpv6='relay'
-    uci set dhcp.wan.ndp='relay'
-    uci set dhcp.lan.ra='hybrid'
-    uci set dhcp.lan.dhcpv6='hybrid'
-    uci set dhcp.lan.ndp='hybrid'
-    uci -q delete dhcp.lan.ra_slaac
-    uci commit network
-    uci commit dhcp
-    /etc/init.d/odhcpd restart
-    rm -f /tmp/.ipv6-relay-busy
+	is_relay && exit 0
+	uci -q delete network.wan.ipv6
+	uci -q delete network.lan.ipv6
+	uci set network.lan.ip6assign='64'
+	uci set dhcp.wan.master='1'
+	uci set dhcp.wan.ra='relay'
+	uci set dhcp.wan.dhcpv6='relay'
+	uci set dhcp.wan.ndp='relay'
+	uci set dhcp.lan.ra='hybrid'
+	uci set dhcp.lan.dhcpv6='hybrid'
+	uci set dhcp.lan.ndp='hybrid'
+	uci -q delete dhcp.lan.ra_slaac
+	mode=relay
 else
-    # Already in default (PPPoE/server) mode?
-    [ -z "$(uci -q get dhcp.wan.ra)" ] && \
-    [ "$(uci -q get dhcp.lan.ra)" = "server" ] && exit 0
-
-    touch /tmp/.ipv6-relay-busy
-    uci -q delete network.wan.ipv6
-    uci -q delete network.lan.ipv6
-    uci set network.lan.ip6assign='60'
-    uci -q delete dhcp.wan.master
-    uci -q delete dhcp.wan.ra
-    uci -q delete dhcp.wan.dhcpv6
-    uci -q delete dhcp.wan.ndp
-    uci set dhcp.lan.ra='server'
-    uci set dhcp.lan.dhcpv6='server'
-    uci -q delete dhcp.lan.ndp
-    uci set dhcp.lan.ra_slaac='1'
-    uci commit network
-    uci commit dhcp
-    /etc/init.d/odhcpd restart
-    rm -f /tmp/.ipv6-relay-busy
+	is_server && exit 0
+	uci -q delete network.wan.ipv6
+	uci -q delete network.lan.ipv6
+	uci set network.lan.ip6assign='60'
+	uci -q delete dhcp.wan.master
+	uci -q delete dhcp.wan.ra
+	uci -q delete dhcp.wan.dhcpv6
+	uci -q delete dhcp.wan.ndp
+	uci set dhcp.lan.ra='server'
+	uci set dhcp.lan.dhcpv6='server'
+	uci -q delete dhcp.lan.ndp
+	uci set dhcp.lan.ra_slaac='1'
+	mode=server
 fi
+
+uci commit network
+rc1=$?
+uci commit dhcp
+rc2=$?
+if [ $rc1 -ne 0 ] || [ $rc2 -ne 0 ]; then
+	logger -t ipv6-relay "uci commit failed (network=$rc1 dhcp=$rc2)"
+	exit 1
+fi
+
+new_assign=$(uci -q get network.lan.ip6assign)
+if [ "$old_assign" != "$new_assign" ]; then
+	logger -t ipv6-relay "ip6assign ${old_assign:-unset} -> $new_assign, reconfiguring lan"
+	ifup lan || logger -t ipv6-relay "ifup lan failed"
+fi
+
+/etc/init.d/odhcpd restart || logger -t ipv6-relay "odhcpd restart failed"
+logger -t ipv6-relay "switched to $mode mode (wan proto=$wan_proto)"
