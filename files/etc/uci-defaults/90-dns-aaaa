@@ -4,3 +4,5 @@ uci -q delete dhcp.@dnsmasq[0].filter_aaaa
 uci set dhcp.@dnsmasq[0].filter_aaaa='0'
 uci commit dhcp
 /etc/init.d/dnsmasq restart
+
+exit 0

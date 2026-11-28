@@ -32,3 +32,5 @@ fi
 uci commit network
 uci commit dhcp
 /etc/init.d/odhcpd restart
+
+exit 0
