@@ -1,52 +1,70 @@
 #!/bin/sh
-# 获取第一次CPU统计数据
-cpu_line=$(head -n1 /proc/stat 2>/dev/null)
-cpu_values=${cpu_line#cpu }
-prev_total=0
-prev_idle=0
-count=0
+STATE=/tmp/cpuusage.state
+MIN_JIFFIES=1200
 
-for val in $cpu_values; do
-    if [ $count -eq 3 ]; then
-        prev_idle=$val
-    fi
-    prev_total=$((prev_total + val))
-    count=$((count + 1))
-done
+read_cpu() {
+	set -- $(head -n1 /proc/stat 2>/dev/null)
+	total=0
+	idle=0
+	idx=0
+	for v in "$@"; do
+		idx=$((idx + 1))
+		[ "$idx" -eq 1 ] && continue
+		[ "$idx" -gt 9 ] && break
+		total=$((total + v))
+		if [ "$idx" -eq 5 ] || [ "$idx" -eq 6 ]; then
+			idle=$((idle + v))
+		fi
+	done
+}
 
-# 等待一段时间（增加采样间隔）
-sleep 1
+read_cpu
+cur_total=$total
+cur_idle=$idle
 
-# 获取第二次CPU统计数据
-cpu_line=$(head -n1 /proc/stat 2>/dev/null)
-cpu_values=${cpu_line#cpu }
-curr_total=0
-curr_idle=0
-count=0
+prev_total=""
+prev_idle=""
+prev_usage=""
+if [ -r "$STATE" ]; then
+	read -r prev_total prev_idle prev_usage < "$STATE" 2>/dev/null
+fi
+case "$prev_total" in ''|*[!0-9]*) prev_total="" ;; esac
+case "$prev_idle" in ''|*[!0-9]*) prev_idle="" ;; esac
+case "$prev_usage" in ''|*[!0-9]*) prev_usage="" ;; esac
 
-for val in $cpu_values; do
-    if [ $count -eq 3 ]; then
-        curr_idle=$val
-    fi
-    curr_total=$((curr_total + val))
-    count=$((count + 1))
-done
-
-# 计算差值
-total_diff=$((curr_total - prev_total))
-idle_diff=$((curr_idle - prev_idle))
-
-# 计算CPU使用率
-if [ $total_diff -gt 0 ]; then
-    cpu_usage=$(( (100 * (total_diff - idle_diff)) / total_diff ))
-else
-    cpu_usage=0
+cpu_usage=""
+sampled=0
+if [ -n "$prev_total" ] && [ -n "$prev_idle" ] &&
+   [ "$cur_total" -gt "$prev_total" ] && [ "$cur_idle" -ge "$prev_idle" ]; then
+	total_diff=$((cur_total - prev_total))
+	idle_diff=$((cur_idle - prev_idle))
+	if [ "$total_diff" -ge "$MIN_JIFFIES" ]; then
+		cpu_usage=$(( (100 * (total_diff - idle_diff)) / total_diff ))
+		sampled=1
+	fi
 fi
 
-# 获取 NSS 硬件加速器利用率
+if [ -z "$cpu_usage" ]; then
+	if [ -n "$prev_usage" ]; then
+		cpu_usage=$prev_usage
+	elif [ "$cur_total" -gt 0 ]; then
+		cpu_usage=$(( (100 * (cur_total - cur_idle)) / cur_total ))
+		sampled=1
+	else
+		cpu_usage=0
+	fi
+fi
+
+[ "$cpu_usage" -gt 100 ] && cpu_usage=100
+[ "$cpu_usage" -lt 0 ] && cpu_usage=0
+
+if [ "$sampled" -eq 1 ]; then
+	printf '%s %s %s\n' "$cur_total" "$cur_idle" "$cpu_usage" > "$STATE.new" 2>/dev/null &&
+		mv -f "$STATE.new" "$STATE" 2>/dev/null
+fi
+
 nss_load="$(awk 'NR == 6 { print $2; exit }' /sys/kernel/debug/qca-nss-drv/stats/cpu_load_ubi 2>/dev/null)"
 
-# 获取 ECM 加速会话数
 ecm_sessions="$(cat /sys/kernel/debug/ecm/ecm_db/connection_count_simple 2>/dev/null | awk '
 {
     for (i = 1; i < NF; i += 2) {
@@ -58,7 +76,6 @@ ecm_sessions="$(cat /sys/kernel/debug/ecm/ecm_db/connection_count_simple 2>/dev/
     if (total != "") printf "%s (TCP %s / UDP %s / Other %s)", total, tcp, udp, other
 }')"
 
-# 构建输出字符串
 output="CPU ${cpu_usage}%"
 [ -n "$nss_load" ] && output="$output · NSS Load ${nss_load}"
 [ -n "$ecm_sessions" ] && output="$output · ECM Sessions ${ecm_sessions}"
